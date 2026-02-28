@@ -1,0 +1,125 @@
+.connections-page {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.connections-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.connections-loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.connections-section {
+  margin-bottom: 28px;
+}
+
+.connections-section h2 {
+  font-size: 1.2rem;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+}
+
+.connections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.connection-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+.connection-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.connection-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #6c63ff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin: 0 auto 12px;
+}
+
+.connection-name {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.connection-name:hover {
+  color: #6c63ff;
+}
+
+.connection-headline {
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+}
+
+.connection-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.accept-btn {
+  padding: 8px 20px;
+  background-color: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.accept-btn:hover {
+  background-color: #5a52d5;
+}
+
+.reject-btn {
+  padding: 8px 20px;
+  background: transparent;
+  color: #888;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.reject-btn:hover {
+  background-color: #f0f2f5;
+}
+
+.connections-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
