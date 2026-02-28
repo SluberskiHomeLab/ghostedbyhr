@@ -23,15 +23,16 @@ function ProfilePage() {
     currentUser && (currentUser.id === parseInt(id, 10) || String(currentUser.id) === id);
 
   const fetchProfile = useCallback(async () => {
+    setLoading(true);
     try {
       const [profileRes, postsRes] = await Promise.all([
         api.get(`/users/${id}`),
-        api.get('/posts'),
+        api.get('/posts', { params: { user_id: id } }),
       ]);
       const profileData = profileRes.data;
       setProfile(profileData);
-      const allPosts = Array.isArray(postsRes.data) ? postsRes.data : postsRes.data.posts || [];
-      setPosts(allPosts.filter((p) => String(p.user_id) === String(id)));
+      const userPosts = Array.isArray(postsRes.data) ? postsRes.data : postsRes.data.posts || [];
+      setPosts(userPosts);
       setEditForm({
         headline: profileData.headline || '',
         bio: profileData.bio || '',

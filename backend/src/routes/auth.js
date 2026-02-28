@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
+const { JWT_SECRET } = require('../config/secrets');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'ghostedbyhr_secret_key';
 
 // POST /register
 router.post('/register', async (req, res) => {

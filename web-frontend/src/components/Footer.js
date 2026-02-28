@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import config from '../config';
 import './Footer.css';
-
-const APP_URL = process.env.REACT_APP_APP_URL || 'http://localhost:3000';
 
 function Footer() {
   return (
@@ -20,8 +19,8 @@ function Footer() {
         </div>
         <div className="footer-section">
           <h4>Account</h4>
-          <a href={`${APP_URL}/login`} className="footer-link">Sign In</a>
-          <a href={`${APP_URL}/register`} className="footer-link">Sign Up</a>
+          <a href={`${config.APP_URL}/login`} className="footer-link">Sign In</a>
+          <a href={`${config.APP_URL}/register`} className="footer-link">Sign Up</a>
         </div>
       </div>
       <div className="footer-bottom">

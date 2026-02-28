@@ -4,9 +4,22 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-// GET / - Get all posts
+// GET / - Get all posts (optional ?user_id= filter)
 router.get('/', async (req, res) => {
   try {
+    const { user_id } = req.query;
+    const params = [];
+    let whereClause = '';
+
+    if (user_id) {
+      const parsedUserId = parseInt(user_id, 10);
+      if (isNaN(parsedUserId)) {
+        return res.status(400).json({ error: 'user_id must be a valid integer' });
+      }
+      params.push(parsedUserId);
+      whereClause = `WHERE p.user_id = $1`;
+    }
+
     const result = await pool.query(
       `SELECT p.*,
               u.first_name, u.last_name, u.headline, u.avatar_url,
@@ -16,7 +29,9 @@ router.get('/', async (req, res) => {
        JOIN users u ON p.user_id = u.id
        LEFT JOIN (SELECT post_id, COUNT(*) AS like_count FROM likes GROUP BY post_id) l ON p.id = l.post_id
        LEFT JOIN (SELECT post_id, COUNT(*) AS comment_count FROM comments GROUP BY post_id) c ON p.id = c.post_id
-       ORDER BY p.created_at DESC`
+       ${whereClause}
+       ORDER BY p.created_at DESC`,
+      params
     );
     res.json(result.rows);
   } catch (err) {

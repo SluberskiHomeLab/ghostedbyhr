@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import config from '../config';
 import './Navbar.css';
-
-const APP_URL = process.env.REACT_APP_APP_URL || 'http://localhost:3000';
 
 function Navbar() {
   return (
@@ -17,8 +16,8 @@ function Navbar() {
           <Link to="/about" className="nav-link">About</Link>
         </div>
         <div className="navbar-auth">
-          <a href={`${APP_URL}/login`} className="btn btn-signin">Sign In</a>
-          <a href={`${APP_URL}/register`} className="btn btn-signup">Sign Up</a>
+          <a href={`${config.APP_URL}/login`} className="btn btn-signin">Sign In</a>
+          <a href={`${config.APP_URL}/register`} className="btn btn-signup">Sign Up</a>
         </div>
       </div>
     </nav>

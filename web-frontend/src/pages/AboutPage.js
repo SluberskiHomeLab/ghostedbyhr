@@ -1,8 +1,7 @@
 import React from 'react';
 import Footer from '../components/Footer';
+import config from '../config';
 import './AboutPage.css';
-
-const APP_URL = process.env.REACT_APP_APP_URL || 'http://localhost:3000';
 
 function AboutPage() {
   return (
@@ -50,7 +49,7 @@ function AboutPage() {
             Whether you have been ghosted once or a dozen times, your experience matters.
             Join our growing community and help us create a more transparent job market for everyone.
           </p>
-          <a href={`${APP_URL}/register`} className="about-cta">Join the Community</a>
+          <a href={`${config.APP_URL}/register`} className="about-cta">Join the Community</a>
         </div>
       </section>
 

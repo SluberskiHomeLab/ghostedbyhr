@@ -51,7 +51,8 @@ CREATE TABLE connections (
     status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(requester_id, receiver_id)
+    UNIQUE(requester_id, receiver_id),
+    CONSTRAINT unique_connection_pair UNIQUE (LEAST(requester_id, receiver_id), GREATEST(requester_id, receiver_id))
 );
 
 -- Create indexes for better query performance

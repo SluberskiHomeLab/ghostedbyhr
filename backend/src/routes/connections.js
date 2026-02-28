@@ -7,10 +7,10 @@ const router = express.Router();
 // POST / - Send connection request
 router.post('/', auth, async (req, res) => {
   try {
-    const { receiver_id } = req.body;
+    const receiver_id = parseInt(req.body.receiver_id, 10);
 
-    if (!receiver_id) {
-      return res.status(400).json({ error: 'receiver_id is required' });
+    if (!receiver_id || isNaN(receiver_id)) {
+      return res.status(400).json({ error: 'receiver_id must be a valid integer' });
     }
 
     if (receiver_id === req.user.id) {

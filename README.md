@@ -22,6 +22,15 @@ The application consists of four services running in Docker:
 
 ### Running the Application
 
+1. Copy the example environment file and set your secrets:
+
+```bash
+cp .env.example .env
+# Edit .env and set POSTGRES_PASSWORD and JWT_SECRET
+```
+
+2. Start all services:
+
 ```bash
 docker compose up --build
 ```
