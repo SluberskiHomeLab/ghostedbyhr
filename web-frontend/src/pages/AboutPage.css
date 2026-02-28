@@ -1,0 +1,85 @@
+.about-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #ffffff;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.about-hero h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem;
+}
+
+.about-hero p {
+  font-size: 1.15rem;
+  color: #cccccc;
+  margin: 0;
+}
+
+.about-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.about-section {
+  margin-bottom: 3rem;
+}
+
+.about-section h2 {
+  font-size: 1.75rem;
+  color: #1a1a2e;
+  margin: 0 0 1rem;
+}
+
+.about-section p {
+  font-size: 1.05rem;
+  color: #444444;
+  line-height: 1.7;
+  margin: 0 0 1rem;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.value-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.value-card h3 {
+  font-size: 1.1rem;
+  color: #1a1a2e;
+  margin: 0 0 0.5rem;
+}
+
+.value-card p {
+  font-size: 0.95rem;
+  color: #666666;
+  margin: 0;
+}
+
+.about-cta {
+  display: inline-block;
+  background-color: #6c63ff;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.about-cta:hover {
+  background-color: #5a52d5;
+  transform: translateY(-2px);
+}
