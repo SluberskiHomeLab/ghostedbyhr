@@ -2,6 +2,8 @@ import React from 'react';
 import Footer from '../components/Footer';
 import './HomePage.css';
 
+const APP_URL = process.env.REACT_APP_APP_URL || 'http://localhost:3000';
+
 function HomePage() {
   return (
     <div className="home-page">
@@ -13,7 +15,7 @@ function HomePage() {
             You&apos;re not alone. Join a community of job seekers sharing their experiences,
             reviewing companies, and supporting each other through the job search process.
           </p>
-          <a href="http://localhost:3000/register" className="hero-cta">Get Started</a>
+          <a href={`${APP_URL}/register`} className="hero-cta">Get Started</a>
         </div>
       </section>
 

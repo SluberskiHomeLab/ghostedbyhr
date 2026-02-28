@@ -2,6 +2,8 @@ import React from 'react';
 import Footer from '../components/Footer';
 import './FeaturesPage.css';
 
+const APP_URL = process.env.REACT_APP_APP_URL || 'http://localhost:3000';
+
 function FeaturesPage() {
   return (
     <div className="features-page">
@@ -75,7 +77,7 @@ function FeaturesPage() {
       <section className="features-cta-section">
         <h2>Ready to join the community?</h2>
         <p>Sign up today and start sharing your experiences.</p>
-        <a href="http://localhost:3000/register" className="features-cta">Get Started Free</a>
+        <a href={`${APP_URL}/register`} className="features-cta">Get Started Free</a>
       </section>
 
       <Footer />
