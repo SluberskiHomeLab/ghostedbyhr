@@ -12,7 +12,7 @@ function Feed() {
   const fetchPosts = useCallback(async () => {
     try {
       const response = await api.get('/posts');
-      setPosts(response.data.posts || response.data || []);
+      setPosts(Array.isArray(response.data) ? response.data : response.data.posts || []);
     } catch (err) {
       console.error('Failed to fetch posts:', err);
     } finally {
@@ -39,7 +39,7 @@ function Feed() {
           ) : (
             posts.map((post) => (
               <PostCard
-                key={post._id || post.id}
+                key={post.id}
                 post={post}
                 onUpdate={fetchPosts}
               />

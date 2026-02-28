@@ -23,10 +23,10 @@ function Navbar() {
             <>
               <Link to="/" className="nav-link">Feed</Link>
               <Link to="/connections" className="nav-link">Connections</Link>
-              <Link to={`/profile/${user._id || user.id}`} className="nav-link">
+              <Link to={`/profile/${user.id}`} className="nav-link">
                 Profile
               </Link>
-              <span className="nav-user-name">{user.firstName} {user.lastName}</span>
+              <span className="nav-user-name">{user.first_name} {user.last_name}</span>
               <button onClick={handleLogout} className="nav-btn logout-btn">
                 Logout
               </button>

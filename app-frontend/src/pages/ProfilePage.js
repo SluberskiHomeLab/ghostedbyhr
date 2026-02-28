@@ -20,17 +20,18 @@ function ProfilePage() {
   });
 
   const isOwnProfile =
-    currentUser && (currentUser._id === id || currentUser.id === id);
+    currentUser && (currentUser.id === parseInt(id, 10) || String(currentUser.id) === id);
 
   const fetchProfile = useCallback(async () => {
     try {
       const [profileRes, postsRes] = await Promise.all([
         api.get(`/users/${id}`),
-        api.get(`/users/${id}/posts`).catch(() => ({ data: [] })),
+        api.get('/posts'),
       ]);
-      const profileData = profileRes.data.user || profileRes.data;
+      const profileData = profileRes.data;
       setProfile(profileData);
-      setPosts(postsRes.data.posts || postsRes.data || []);
+      const allPosts = Array.isArray(postsRes.data) ? postsRes.data : postsRes.data.posts || [];
+      setPosts(allPosts.filter((p) => String(p.user_id) === String(id)));
       setEditForm({
         headline: profileData.headline || '',
         bio: profileData.bio || '',
@@ -79,7 +80,7 @@ function ProfilePage() {
     );
   }
 
-  const initials = `${(profile.firstName || '')[0] || ''}${(profile.lastName || '')[0] || ''}`.toUpperCase();
+  const initials = `${(profile.first_name || '')[0] || ''}${(profile.last_name || '')[0] || ''}`.toUpperCase();
 
   return (
     <div className="profile-page">
@@ -91,7 +92,7 @@ function ProfilePage() {
             <div className="profile-avatar-large">{initials}</div>
             <div className="profile-info">
               <h1>
-                {profile.firstName} {profile.lastName}
+                {profile.first_name} {profile.last_name}
               </h1>
               {editing ? (
                 <div className="profile-edit-form">
@@ -161,7 +162,7 @@ function ProfilePage() {
           ) : (
             posts.map((post) => (
               <PostCard
-                key={post._id || post.id}
+                key={post.id}
                 post={post}
                 onUpdate={fetchProfile}
               />

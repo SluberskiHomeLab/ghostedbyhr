@@ -17,8 +17,9 @@ export function AuthProvider({ children }) {
       if (storedToken) {
         try {
           const response = await api.get('/auth/me');
-          setUser(response.data.user || response.data);
-          localStorage.setItem('user', JSON.stringify(response.data.user || response.data));
+          const userData = response.data;
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
         } catch {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -45,8 +46,8 @@ export function AuthProvider({ children }) {
     const response = await api.post('/auth/register', {
       email,
       password,
-      firstName,
-      lastName,
+      first_name: firstName,
+      last_name: lastName,
     });
     const { token: newToken, user: newUser } = response.data;
     localStorage.setItem('token', newToken);

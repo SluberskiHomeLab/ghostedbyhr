@@ -24,7 +24,7 @@ function CreatePost({ onPostCreated }) {
   };
 
   const initials = user
-    ? `${(user.firstName || '')[0] || ''}${(user.lastName || '')[0] || ''}`.toUpperCase()
+    ? `${(user.first_name || '')[0] || ''}${(user.last_name || '')[0] || ''}`.toUpperCase()
     : '';
 
   return (
@@ -32,7 +32,7 @@ function CreatePost({ onPostCreated }) {
       <div className="create-post-header">
         <div className="create-post-avatar">{initials}</div>
         <span className="create-post-greeting">
-          What's on your mind, {user?.firstName}?
+          What's on your mind, {user?.first_name}?
         </span>
       </div>
       <form onSubmit={handleSubmit}>

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import './PostCard.css';
 
-function getInitials(firstName, lastName) {
-  return `${(firstName || '')[0] || ''}${(lastName || '')[0] || ''}`.toUpperCase();
+function getInitials(first_name, last_name) {
+  return `${(first_name || '')[0] || ''}${(last_name || '')[0] || ''}`.toUpperCase();
 }
 
 function timeAgo(dateString) {
@@ -22,22 +21,34 @@ function timeAgo(dateString) {
 }
 
 function PostCard({ post, onUpdate }) {
-  const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const author = post.author || {};
-  const userId = user?._id || user?.id;
-  const isLiked = (post.likes || []).includes(userId);
-
   const handleLike = async () => {
     try {
-      await api.post(`/posts/${post._id || post.id}/like`);
+      await api.post(`/posts/${post.id}/like`);
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Failed to like post:', err);
     }
+  };
+
+  const fetchComments = async () => {
+    try {
+      const res = await api.get(`/posts/${post.id}/comments`);
+      setComments(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch comments:', err);
+    }
+  };
+
+  const toggleComments = () => {
+    if (!showComments) {
+      fetchComments();
+    }
+    setShowComments(!showComments);
   };
 
   const handleComment = async (e) => {
@@ -45,10 +56,11 @@ function PostCard({ post, onUpdate }) {
     if (!commentText.trim() || submitting) return;
     setSubmitting(true);
     try {
-      await api.post(`/posts/${post._id || post.id}/comments`, {
+      await api.post(`/posts/${post.id}/comments`, {
         content: commentText,
       });
       setCommentText('');
+      fetchComments();
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error('Failed to comment:', err);
@@ -60,17 +72,17 @@ function PostCard({ post, onUpdate }) {
   return (
     <div className="post-card">
       <div className="post-header">
-        <Link to={`/profile/${author._id || author.id}`} className="post-avatar">
-          {getInitials(author.firstName, author.lastName)}
+        <Link to={`/profile/${post.user_id}`} className="post-avatar">
+          {getInitials(post.first_name, post.last_name)}
         </Link>
         <div className="post-author-info">
-          <Link to={`/profile/${author._id || author.id}`} className="post-author-name">
-            {author.firstName} {author.lastName}
+          <Link to={`/profile/${post.user_id}`} className="post-author-name">
+            {post.first_name} {post.last_name}
           </Link>
-          {author.headline && (
-            <span className="post-author-headline">{author.headline}</span>
+          {post.headline && (
+            <span className="post-author-headline">{post.headline}</span>
           )}
-          <span className="post-time">{timeAgo(post.createdAt || post.created_at)}</span>
+          <span className="post-time">{timeAgo(post.created_at)}</span>
         </div>
       </div>
 
@@ -79,20 +91,20 @@ function PostCard({ post, onUpdate }) {
       </div>
 
       <div className="post-stats">
-        <span>{(post.likes || []).length} likes</span>
-        <span>{(post.comments || []).length} comments</span>
+        <span>{post.like_count || 0} likes</span>
+        <span>{post.comment_count || 0} comments</span>
       </div>
 
       <div className="post-actions">
         <button
-          className={`post-action-btn ${isLiked ? 'liked' : ''}`}
+          className="post-action-btn"
           onClick={handleLike}
         >
-          {isLiked ? '👍 Liked' : '👍 Like'}
+          👍 Like
         </button>
         <button
           className="post-action-btn"
-          onClick={() => setShowComments(!showComments)}
+          onClick={toggleComments}
         >
           💬 Comment
         </button>
@@ -100,22 +112,19 @@ function PostCard({ post, onUpdate }) {
 
       {showComments && (
         <div className="post-comments">
-          {(post.comments || []).map((comment, idx) => {
-            const commenter = comment.author || comment.user || {};
-            return (
-              <div key={comment._id || idx} className="comment">
-                <div className="comment-avatar">
-                  {getInitials(commenter.firstName, commenter.lastName)}
-                </div>
-                <div className="comment-body">
-                  <span className="comment-author">
-                    {commenter.firstName} {commenter.lastName}
-                  </span>
-                  <p className="comment-text">{comment.content || comment.text}</p>
-                </div>
+          {comments.map((comment, idx) => (
+            <div key={comment.id || idx} className="comment">
+              <div className="comment-avatar">
+                {getInitials(comment.first_name, comment.last_name)}
               </div>
-            );
-          })}
+              <div className="comment-body">
+                <span className="comment-author">
+                  {comment.first_name} {comment.last_name}
+                </span>
+                <p className="comment-text">{comment.content}</p>
+              </div>
+            </div>
+          ))}
           <form onSubmit={handleComment} className="comment-form">
             <input
               type="text"
