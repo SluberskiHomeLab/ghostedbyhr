@@ -35,17 +35,23 @@ services:
 
   app-frontend:
     build: ./app-frontend
-    ports:
-      - "${APP_FRONTEND_PORT}:${APP_FRONTEND_PORT}"
     depends_on:
       - backend
     restart: unless-stopped
 
   web-frontend:
     build: ./web-frontend
-    ports:
-      - "${WEB_FRONTEND_PORT}:${WEB_FRONTEND_PORT}"
     depends_on:
+      - backend
+    restart: unless-stopped
+
+  proxy:
+    build: ./proxy
+    ports:
+      - "${PROXY_PORT}:80"
+    depends_on:
+      - app-frontend
+      - web-frontend
       - backend
     restart: unless-stopped
 
