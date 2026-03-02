@@ -9,7 +9,7 @@ function Footer() {
       <div className="footer-container">
         <div className="footer-section">
           <h3 className="footer-brand">👻 Ghosted By HR</h3>
-          <p className="footer-tagline">A community for job seekers to share experiences and support each other.</p>
+          <p className="footer-tagline">A community for job seekers to share experiences and have fun.</p>
         </div>
         <div className="footer-section">
           <h4>Navigation</h4>

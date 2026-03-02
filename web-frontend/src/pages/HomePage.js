@@ -12,7 +12,7 @@ function HomePage() {
           <h1 className="hero-title">Tired of Being Ghosted by HR?</h1>
           <p className="hero-subtitle">
             You&apos;re not alone. Join a community of job seekers sharing their experiences,
-            reviewing companies, and supporting each other through the job search process.
+            reviewing companies, and kicking companies in the balls.
           </p>
           <a href={`${config.APP_URL}/register`} className="hero-cta">Get Started</a>
         </div>
@@ -21,12 +21,12 @@ function HomePage() {
       {/* Features Overview */}
       <section className="features-overview">
         <h2 className="section-title">Why Ghosted By HR?</h2>
-        <p className="section-subtitle">Everything you need to navigate your job search with confidence.</p>
+        <p className="section-subtitle">Why should you post with us?</p>
         <div className="features-grid">
           <div className="feature-card">
             <div className="feature-icon">📝</div>
             <h3>Share Your Story</h3>
-            <p>Post your ghosting experiences anonymously and let others know which companies leave candidates hanging.</p>
+            <p>Post your ghosting experiences anonymously and let others laugh and commiserate.</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">🤝</div>
@@ -40,8 +40,8 @@ function HomePage() {
           </div>
           <div className="feature-card">
             <div className="feature-icon">🚀</div>
-            <h3>Job Search Support</h3>
-            <p>Access resources, tips, and community wisdom to improve your job search strategy and land your next role.</p>
+            <h3>Freedom</h3>
+            <p>Say what you want, Do you want to tell a company to shove their hiring process up their ass?  Say it!</p>
           </div>
         </div>
       </section>

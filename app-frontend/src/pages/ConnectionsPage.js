@@ -73,6 +73,7 @@ function ConnectionsPage() {
         first_name: conn.receiver_first_name,
         last_name: conn.receiver_last_name,
         headline: conn.receiver_headline,
+        avatar_url: conn.receiver_avatar_url,
       };
     }
     return {
@@ -80,6 +81,7 @@ function ConnectionsPage() {
       first_name: conn.requester_first_name,
       last_name: conn.requester_last_name,
       headline: conn.requester_headline,
+      avatar_url: conn.requester_avatar_url,
     };
   };
 
@@ -100,7 +102,10 @@ function ConnectionsPage() {
                     return (
                       <div key={conn.id} className="connection-card">
                         <div className="connection-avatar">
-                          {getInitials(person.first_name, person.last_name)}
+                          {person.avatar_url
+                            ? <img src={person.avatar_url} alt={`${person.first_name} ${person.last_name}`} className="connection-avatar-img" />
+                            : getInitials(person.first_name, person.last_name)
+                          }
                         </div>
                         <Link
                           to={`/profile/${person.id}`}
@@ -145,7 +150,10 @@ function ConnectionsPage() {
                     return (
                       <div key={conn.id} className="connection-card">
                         <div className="connection-avatar">
-                          {getInitials(person.first_name, person.last_name)}
+                          {person.avatar_url
+                            ? <img src={person.avatar_url} alt={`${person.first_name} ${person.last_name}`} className="connection-avatar-img" />
+                            : getInitials(person.first_name, person.last_name)
+                          }
                         </div>
                         <Link
                           to={`/profile/${person.id}`}

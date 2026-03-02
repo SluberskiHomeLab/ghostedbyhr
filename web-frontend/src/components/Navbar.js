@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import config from '../config';
+import logo from '../assets/logo.jpg';
 import './Navbar.css';
 
 function Navbar() {
@@ -8,7 +9,8 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
-          👻 Ghosted By HR
+          <img src={logo} alt="Ghosted By HR" className="navbar-logo" />
+          <span className="navbar-title">Ghosted By HR</span>
         </Link>
         <div className="navbar-links">
           <Link to="/" className="nav-link">Home</Link>

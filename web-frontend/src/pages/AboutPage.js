@@ -8,7 +8,7 @@ function AboutPage() {
     <div className="about-page">
       <section className="about-hero">
         <h1>About Ghosted By HR</h1>
-        <p>Our mission is to bring transparency to the hiring process.</p>
+        <p>Our mission is to expose shitty hiring practices.</p>
       </section>
 
       <section className="about-content">
@@ -17,11 +17,13 @@ function AboutPage() {
           <p>
             Ghosted By HR was born out of a shared frustration. Too many job seekers invest
             hours into applications, interviews, and follow-ups only to be met with silence.
+            Too many Ghost Jobs on LinkedIn and Indeed, and no accountability for the companies that do it.
             We believe candidates deserve better, and that starts with transparency.
           </p>
           <p>
             Our platform empowers job seekers to share their experiences, hold companies
-            accountable, and support one another through the often stressful job search process.
+            accountable, and flat out taget and expose companies that have hiring practices that are
+            beyond shitty.
           </p>
         </div>
 
@@ -33,12 +35,12 @@ function AboutPage() {
               <p>We believe every candidate deserves honest communication from potential employers.</p>
             </div>
             <div className="value-card">
-              <h3>💪 Empowerment</h3>
-              <p>We give job seekers the tools and information to make better career decisions.</p>
+              <h3>📖 Accountability </h3>
+              <p>We give job seekers the tools and information to expose companies and ghost job postings.</p>
             </div>
             <div className="value-card">
-              <h3>🤗 Community</h3>
-              <p>We foster a supportive environment where shared experiences lead to collective strength.</p>
+              <h3>🤗 Freedom</h3>
+              <p>Say what you want, share your experiences, and help make fun of shitty hiring practices.</p>
             </div>
           </div>
         </div>
@@ -46,8 +48,9 @@ function AboutPage() {
         <div className="about-section">
           <h2>Join Us</h2>
           <p>
-            Whether you have been ghosted once or a dozen times, your experience matters.
-            Join our growing community and help us create a more transparent job market for everyone.
+            Whether you’ve been ghosted by HR or are plagued with thousands of ghost job postings,
+            we invite you to join our community and get some entertainment out of the shitty hiring process. 
+            Share your stories, connect with others, and help us make fun of companies.
           </p>
           <a href={`${config.APP_URL}/register`} className="about-cta">Join the Community</a>
         </div>

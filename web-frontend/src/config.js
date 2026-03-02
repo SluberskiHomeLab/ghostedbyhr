@@ -12,7 +12,7 @@
 const runtimeConfig = window.__RUNTIME_CONFIG__ || {};
 
 const config = {
-  APP_URL: runtimeConfig.APP_URL || process.env.REACT_APP_APP_URL || 'http://localhost:3000',
+  APP_URL: runtimeConfig.APP_URL || process.env.REACT_APP_APP_URL || '/app',
 };
 
 export default config;

@@ -51,11 +51,10 @@ function FeaturesPage() {
         <div className="feature-detail reverse">
           <div className="feature-detail-icon">🚀</div>
           <div className="feature-detail-text">
-            <h2>Job Search Support</h2>
+            <h2>Familiar Experience</h2>
             <p>
-              Access curated resources, resume tips, interview strategies, and
-              community-driven wisdom to improve your job search and land your
-              next role faster.
+              Ghosted By HR is designed to be intuitive and user-friendly, with a familiar social media-like interface.
+              Post updates, comment on others' experiences, and engage with the community in a way that feels natural.
             </p>
           </div>
         </div>
@@ -76,7 +75,7 @@ function FeaturesPage() {
       <section className="features-cta-section">
         <h2>Ready to join the community?</h2>
         <p>Sign up today and start sharing your experiences.</p>
-        <a href={`${config.APP_URL}/register`} className="features-cta">Get Started Free</a>
+        <a href={`${config.APP_URL}/register`} className="features-cta">Get Started</a>
       </section>
 
       <Footer />

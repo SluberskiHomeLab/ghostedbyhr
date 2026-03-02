@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const pool = require('./config/database');
 
 const authRoutes = require('./routes/auth');
@@ -16,6 +17,7 @@ let dbReady = false;
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/api/health', async (req, res) => {
   if (!dbReady) {
@@ -35,9 +37,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/connections', connectionRoutes);
 
 pool.connect()
-  .then((client) => {
+  .then(async (client) => {
     console.log('Connected to PostgreSQL');
     client.release();
+    // Migrate: add banner_url if this is an existing database
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url VARCHAR(500)`);
     dbReady = true;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

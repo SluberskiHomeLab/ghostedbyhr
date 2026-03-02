@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PostCard from '../components/PostCard';
@@ -8,16 +8,20 @@ import './ProfilePage.css';
 
 function ProfilePage() {
   const { id } = useParams();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, refreshUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [editForm, setEditForm] = useState({
     headline: '',
     bio: '',
     location: '',
   });
+  const avatarInputRef = useRef(null);
+  const bannerInputRef = useRef(null);
 
   const isOwnProfile =
     currentUser && (currentUser.id === parseInt(id, 10) || String(currentUser.id) === id);
@@ -59,6 +63,25 @@ function ProfilePage() {
     }
   };
 
+  const handleImageUpload = async (file, type) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    const setter = type === 'avatar' ? setUploadingAvatar : setUploadingBanner;
+    setter(true);
+    try {
+      await api.post(`/users/${id}/${type}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      fetchProfile();
+      if (isOwnProfile) refreshUser();
+    } catch (err) {
+      console.error(`Failed to upload ${type}:`, err);
+    } finally {
+      setter(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="profile-page">
@@ -88,9 +111,70 @@ function ProfilePage() {
       <Navbar />
       <div className="profile-container">
         <div className="profile-header-card">
-          <div className="profile-banner" />
+
+          {/* Banner */}
+          <div
+            className="profile-banner"
+            style={{
+              backgroundImage: profile.banner_url
+                ? `url(${profile.banner_url})`
+                : 'linear-gradient(135deg, #1a1a2e, #6c63ff)',
+            }}
+          >
+            {isOwnProfile && (
+              <>
+                <button
+                  className="upload-overlay-btn banner-upload-btn"
+                  onClick={() => bannerInputRef.current.click()}
+                  disabled={uploadingBanner}
+                  title="Change banner image"
+                >
+                  {uploadingBanner ? '⏳' : '🖼 Change Banner'}
+                </button>
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="upload-input-hidden"
+                  onChange={(e) => handleImageUpload(e.target.files[0], 'banner')}
+                />
+              </>
+            )}
+          </div>
+
           <div className="profile-header-content">
-            <div className="profile-avatar-large">{initials}</div>
+            {/* Avatar */}
+            <div className="profile-avatar-wrapper">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={`${profile.first_name} ${profile.last_name}`}
+                  className="profile-avatar-large profile-avatar-img"
+                />
+              ) : (
+                <div className="profile-avatar-large">{initials}</div>
+              )}
+              {isOwnProfile && (
+                <>
+                  <button
+                    className="upload-overlay-btn avatar-upload-btn"
+                    onClick={() => avatarInputRef.current.click()}
+                    disabled={uploadingAvatar}
+                    title="Change profile picture"
+                  >
+                    {uploadingAvatar ? '⏳' : '📷'}
+                  </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="upload-input-hidden"
+                    onChange={(e) => handleImageUpload(e.target.files[0], 'avatar')}
+                  />
+                </>
+              )}
+            </div>
+
             <div className="profile-info">
               <h1>
                 {profile.first_name} {profile.last_name}
@@ -174,5 +258,6 @@ function ProfilePage() {
     </div>
   );
 }
+
 
 export default ProfilePage;

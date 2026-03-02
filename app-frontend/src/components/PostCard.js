@@ -73,7 +73,10 @@ function PostCard({ post, onUpdate }) {
     <div className="post-card">
       <div className="post-header">
         <Link to={`/profile/${post.user_id}`} className="post-avatar">
-          {getInitials(post.first_name, post.last_name)}
+          {post.avatar_url
+            ? <img src={post.avatar_url} alt={`${post.first_name} ${post.last_name}`} className="post-avatar-img" />
+            : getInitials(post.first_name, post.last_name)
+          }
         </Link>
         <div className="post-author-info">
           <Link to={`/profile/${post.user_id}`} className="post-author-name">
@@ -115,7 +118,10 @@ function PostCard({ post, onUpdate }) {
           {comments.map((comment, idx) => (
             <div key={comment.id || idx} className="comment">
               <div className="comment-avatar">
-                {getInitials(comment.first_name, comment.last_name)}
+                {comment.avatar_url
+                  ? <img src={comment.avatar_url} alt={`${comment.first_name} ${comment.last_name}`} className="comment-avatar-img" />
+                  : getInitials(comment.first_name, comment.last_name)
+                }
               </div>
               <div className="comment-body">
                 <span className="comment-author">

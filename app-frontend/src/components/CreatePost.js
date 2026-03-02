@@ -30,7 +30,12 @@ function CreatePost({ onPostCreated }) {
   return (
     <div className="create-post">
       <div className="create-post-header">
-        <div className="create-post-avatar">{initials}</div>
+        <div className="create-post-avatar">
+          {user?.avatar_url
+            ? <img src={user.avatar_url} alt={user.first_name} className="create-post-avatar-img" />
+            : initials
+          }
+        </div>
         <span className="create-post-greeting">
           What's on your mind, {user?.first_name}?
         </span>

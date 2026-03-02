@@ -12,6 +12,7 @@ CREATE TABLE users (
     bio TEXT,
     location VARCHAR(255),
     avatar_url VARCHAR(500),
+    banner_url VARCHAR(500),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

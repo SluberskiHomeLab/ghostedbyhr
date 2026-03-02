@@ -26,8 +26,11 @@
 }
 
 .profile-banner {
-  height: 120px;
-  background: linear-gradient(135deg, #1a1a2e, #6c63ff);
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
 .profile-header-content {
@@ -50,6 +53,17 @@
   font-weight: 700;
   font-size: 2rem;
   border: 4px solid #fff;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.profile-avatar-img {
+  object-fit: cover;
+  background-color: #e8e8e8;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
   flex-shrink: 0;
 }
 
@@ -150,6 +164,50 @@
 
 .cancel-btn:hover {
   background-color: #f0f2f5;
+}
+
+.upload-input-hidden {
+  display: none;
+}
+
+.upload-overlay-btn {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 5px 10px;
+}
+
+.upload-overlay-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.upload-overlay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.banner-upload-btn {
+  bottom: 8px;
+  right: 12px;
+}
+
+.avatar-upload-btn {
+  bottom: 0;
+  right: 0;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
 }
 
 .profile-posts-section {
