@@ -1,0 +1,123 @@
+.settings-page {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.settings-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.settings-container h1 {
+  font-size: 1.4rem;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+.settings-card h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.settings-current-value {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 14px;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-form label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.settings-form input {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.settings-form input:focus {
+  border-color: #6c63ff;
+}
+
+.settings-form-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.settings-save-btn {
+  padding: 9px 24px;
+  background-color: #6c63ff;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.settings-save-btn:hover:not(:disabled) {
+  background-color: #5a52d5;
+}
+
+.settings-save-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.settings-success {
+  color: #2e7d32;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.settings-error {
+  color: #c62828;
+  font-size: 0.85rem;
+  background: #fff3f3;
+  border: 1px solid #f5c6c6;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+
+.smtp-note {
+  font-size: 0.8rem;
+  color: #999;
+  text-align: center;
+  padding: 4px 0 8px;
+}

@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import Feed from './pages/Feed';
 import ProfilePage from './pages/ProfilePage';
 import ConnectionsPage from './pages/ConnectionsPage';
+import AccountSettingsPage from './pages/AccountSettingsPage';
 import './App.css';
 
 function App() {
@@ -37,6 +38,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ConnectionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <AccountSettingsPage />
               </ProtectedRoute>
             }
           />

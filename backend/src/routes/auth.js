@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 const { JWT_SECRET } = require('../config/secrets');
+const { sendMail } = require('../config/mailer');
 
 const router = express.Router();
 
@@ -87,6 +88,104 @@ router.get('/me', auth, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Get me error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /change-password
+router.put('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const user = result.rows[0];
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHash = await bcrypt.hash(newPassword, salt);
+
+    await pool.query(
+      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [newHash, req.user.id]
+    );
+
+    // Notify via email (no-op if SMTP not configured)
+    sendMail({
+      to: user.email,
+      subject: 'Your Ghosted By HR password was changed',
+      html: `<p>Hi ${user.first_name},</p>
+             <p>Your account password was just changed. If you did not do this, please contact support immediately.</p>`,
+      text: `Hi ${user.first_name},\n\nYour account password was just changed. If you did not do this, please contact support immediately.`,
+    }).catch((err) => console.error('Failed to send password-change email:', err.message));
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Change password error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /change-email
+router.put('/change-email', auth, async (req, res) => {
+  try {
+    const { newEmail, password } = req.body;
+
+    if (!newEmail || !password) {
+      return res.status(400).json({ error: 'newEmail and password are required' });
+    }
+
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const user = result.rows[0];
+
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Password is incorrect' });
+    }
+
+    const normalizedEmail = newEmail.toLowerCase().trim();
+    if (normalizedEmail === user.email.toLowerCase()) {
+      return res.status(400).json({ error: 'New email is the same as your current email' });
+    }
+
+    const existing = await pool.query('SELECT id FROM users WHERE LOWER(email) = $1', [normalizedEmail]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'That email address is already in use' });
+    }
+
+    await pool.query(
+      'UPDATE users SET email = $1, updated_at = NOW() WHERE id = $2',
+      [normalizedEmail, req.user.id]
+    );
+
+    // Notify old address (no-op if SMTP not configured)
+    sendMail({
+      to: user.email,
+      subject: 'Your Ghosted By HR email address was changed',
+      html: `<p>Hi ${user.first_name},</p>
+             <p>The email address on your account was changed to <strong>${normalizedEmail}</strong>. If you did not do this, please contact support immediately.</p>`,
+      text: `Hi ${user.first_name},\n\nThe email on your account was changed to ${normalizedEmail}. If you did not do this, please contact support immediately.`,
+    }).catch((err) => console.error('Failed to send email-change notification:', err.message));
+
+    res.json({ message: 'Email updated successfully', email: normalizedEmail });
+  } catch (err) {
+    console.error('Change email error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
