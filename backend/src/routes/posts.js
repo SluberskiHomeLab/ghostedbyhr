@@ -43,17 +43,17 @@ router.get('/', async (req, res) => {
 // POST / - Create a post
 router.post('/', auth, async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, media_url, media_type } = req.body;
 
-    if (!content) {
-      return res.status(400).json({ error: 'Content is required' });
+    if (!content && !media_url) {
+      return res.status(400).json({ error: 'Content or media is required' });
     }
 
     const result = await pool.query(
-      `INSERT INTO posts (user_id, content)
-       VALUES ($1, $2)
+      `INSERT INTO posts (user_id, content, media_url, media_type)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [req.user.id, content]
+      [req.user.id, content || '', media_url || null, media_type || null]
     );
 
     res.status(201).json(result.rows[0]);
@@ -165,10 +165,10 @@ router.get('/:id/comments', async (req, res) => {
 // POST /:id/comments - Add a comment
 router.post('/:id/comments', auth, async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, media_url, media_type } = req.body;
 
-    if (!content) {
-      return res.status(400).json({ error: 'Content is required' });
+    if (!content && !media_url) {
+      return res.status(400).json({ error: 'Content or media is required' });
     }
 
     const post = await pool.query('SELECT id FROM posts WHERE id = $1', [req.params.id]);
@@ -177,10 +177,10 @@ router.post('/:id/comments', auth, async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO comments (post_id, user_id, content)
-       VALUES ($1, $2, $3)
+      `INSERT INTO comments (post_id, user_id, content, media_url, media_type)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [req.params.id, req.user.id, content]
+      [req.params.id, req.user.id, content || '', media_url || null, media_type || null]
     );
 
     res.status(201).json(result.rows[0]);

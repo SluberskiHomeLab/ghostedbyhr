@@ -58,8 +58,78 @@
 
 .create-post-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 12px;
+  gap: 8px;
+}
+
+.create-post-media-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  color: #555;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.create-post-media-btn:hover:not(:disabled) {
+  background-color: #f0f2f5;
+  border-color: #bbb;
+}
+
+.create-post-media-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.media-btn-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.create-post-uploading {
+  font-size: 0.82rem;
+  color: #6c63ff;
+}
+
+.create-post-media-preview {
+  position: relative;
+  margin-top: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.create-post-media-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.create-post-upload-error {
+  color: #e53935;
+  font-size: 0.8rem;
+  margin: 6px 0 0;
 }
 
 .create-post-btn {

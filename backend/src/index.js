@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
 const userRoutes = require('./routes/users');
 const connectionRoutes = require('./routes/connections');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/connections', connectionRoutes);
+app.use('/api/upload', uploadRoutes);
 
 pool.connect()
   .then(async (client) => {
@@ -42,6 +44,11 @@ pool.connect()
     client.release();
     // Migrate: add banner_url if this is an existing database
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url VARCHAR(500)`);
+    // Migrate: add media support to posts and comments
+    await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS media_url VARCHAR(1000)`);
+    await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS media_type VARCHAR(20)`);
+    await pool.query(`ALTER TABLE comments ADD COLUMN IF NOT EXISTS media_url VARCHAR(1000)`);
+    await pool.query(`ALTER TABLE comments ADD COLUMN IF NOT EXISTS media_type VARCHAR(20)`);
     dbReady = true;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

@@ -21,7 +21,9 @@ CREATE TABLE users (
 CREATE TABLE posts (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    media_url VARCHAR(1000),
+    media_type VARCHAR(20),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -31,7 +33,9 @@ CREATE TABLE comments (
     id SERIAL PRIMARY KEY,
     post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    media_url VARCHAR(1000),
+    media_type VARCHAR(20),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
