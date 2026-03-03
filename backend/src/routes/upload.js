@@ -2,9 +2,18 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const rateLimit = require('express-rate-limit');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
+
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many upload requests, please try again later' },
+});
 
 const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -35,7 +44,7 @@ const upload = multer({
 });
 
 // POST /api/upload - upload a single image or video
-router.post('/', auth, upload.single('media'), (req, res) => {
+router.post('/', uploadLimiter, auth, upload.single('media'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
