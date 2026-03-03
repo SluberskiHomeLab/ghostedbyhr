@@ -1,11 +1,20 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
 // GET /trending - top hashtag for today, week, month
-router.get('/trending', async (req, res) => {
+router.get('/trending', readLimiter, async (req, res) => {
   try {
     const periods = [
       { key: 'day',   interval: '1 day' },
@@ -35,7 +44,7 @@ router.get('/trending', async (req, res) => {
 });
 
 // GET /search?q= - search hashtags
-router.get('/search', async (req, res) => {
+router.get('/search', readLimiter, async (req, res) => {
   try {
     const { q = '' } = req.query;
     const search = q.replace(/^#/, '').trim();
@@ -59,7 +68,7 @@ router.get('/search', async (req, res) => {
 });
 
 // GET /:tag/posts - posts for a given hashtag
-router.get('/:tag/posts', async (req, res) => {
+router.get('/:tag/posts', readLimiter, async (req, res) => {
   try {
     const tag = req.params.tag.toLowerCase().replace(/^#/, '');
     const result = await pool.query(
