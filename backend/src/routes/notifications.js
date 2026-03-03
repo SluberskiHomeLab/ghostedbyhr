@@ -1,11 +1,28 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
 // GET / — list recent notifications for the current user
-router.get('/', auth, async (req, res) => {
+router.get('/', readLimiter, auth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT n.*,
@@ -27,7 +44,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // GET /unread-count
-router.get('/unread-count', auth, async (req, res) => {
+router.get('/unread-count', readLimiter, auth, async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT COUNT(*)::int AS count FROM notifications WHERE user_id = $1 AND read = false',
@@ -41,7 +58,7 @@ router.get('/unread-count', auth, async (req, res) => {
 });
 
 // PUT /read-all — mark all as read
-router.put('/read-all', auth, async (req, res) => {
+router.put('/read-all', writeLimiter, auth, async (req, res) => {
   try {
     await pool.query(
       'UPDATE notifications SET read = true WHERE user_id = $1 AND read = false',
@@ -55,7 +72,7 @@ router.put('/read-all', auth, async (req, res) => {
 });
 
 // PUT /:id/read — mark one as read
-router.put('/:id/read', auth, async (req, res) => {
+router.put('/:id/read', writeLimiter, auth, async (req, res) => {
   try {
     await pool.query(
       'UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2',
@@ -69,7 +86,7 @@ router.put('/:id/read', auth, async (req, res) => {
 });
 
 // GET /settings
-router.get('/settings', auth, async (req, res) => {
+router.get('/settings', readLimiter, auth, async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO user_notification_settings (user_id)
@@ -86,7 +103,7 @@ router.get('/settings', auth, async (req, res) => {
 });
 
 // PUT /settings
-router.put('/settings', auth, async (req, res) => {
+router.put('/settings', writeLimiter, auth, async (req, res) => {
   try {
     const {
       web_notifications,
