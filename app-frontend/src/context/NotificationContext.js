@@ -75,8 +75,8 @@ export function NotificationProvider({ children }) {
     fetchNotifications();
 
     // Set up socket.io connection
-    const backendUrl = process.env.REACT_APP_API_URL
-      ? process.env.REACT_APP_API_URL.replace('/api', '')
+    const backendUrl = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace('/api', '')
       : window.location.origin;
 
     const socket = io(backendUrl, {
