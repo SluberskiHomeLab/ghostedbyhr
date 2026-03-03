@@ -1,12 +1,29 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 const { createNotification } = require('../utils/notify');
 
 const router = express.Router();
 
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
 // POST / - Send connection request
-router.post('/', auth, async (req, res) => {
+router.post('/', writeLimiter, auth, async (req, res) => {
   try {
     const receiver_id = parseInt(req.body.receiver_id, 10);
 
@@ -51,7 +68,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // PUT /:id - Accept/reject connection
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', writeLimiter, auth, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -89,7 +106,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // GET / - Get all connections for current user
-router.get('/', auth, async (req, res) => {
+router.get('/', readLimiter, auth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT c.*,
