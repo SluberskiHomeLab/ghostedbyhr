@@ -5,8 +5,14 @@ const pool = require('../config/database');
 const auth = require('../middleware/auth');
 const { JWT_SECRET } = require('../config/secrets');
 const { sendMail } = require('../config/mailer');
+const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
+
+const sensitiveActionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // limit each IP to 20 requests per windowMs for sensitive actions
+});
 
 // POST /register
 router.post('/register', async (req, res) => {
@@ -147,7 +153,7 @@ router.put('/change-password', auth, async (req, res) => {
 });
 
 // PUT /change-email
-router.put('/change-email', auth, async (req, res) => {
+router.put('/change-email', sensitiveActionLimiter, auth, async (req, res) => {
   try {
     const { newEmail, password } = req.body;
 
