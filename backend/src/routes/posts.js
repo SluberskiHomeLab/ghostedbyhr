@@ -1,9 +1,26 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 const { createNotification, extractMentions } = require('../utils/notify');
 
 const router = express.Router();
+
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 120, // limit each IP to 120 read requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // limit each IP to 30 write requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
 
 // Optional auth — attaches user if valid token present, does not block
 function optionalAuth(req, res, next) {
@@ -45,7 +62,7 @@ const POST_JOINS = `JOIN users u ON p.user_id = u.id
 
 // GET / - Get posts
 // Query params: user_id, feed=connections, sort=popular, hashtag, q
-router.get('/', optionalAuth, async (req, res) => {
+router.get('/', readLimiter, optionalAuth, async (req, res) => {
   try {
     const { user_id, feed, sort, hashtag, q } = req.query;
     const params = [];
@@ -95,7 +112,7 @@ router.get('/', optionalAuth, async (req, res) => {
 });
 
 // POST / - Create a post
-router.post('/', auth, async (req, res) => {
+router.post('/', writeLimiter, auth, async (req, res) => {
   try {
     const { content, media_url, media_type, visibility = 'public' } = req.body;
 
@@ -130,7 +147,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // GET /:id - Get a single post
-router.get('/:id', async (req, res) => {
+router.get('/:id', readLimiter, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT ${POST_SELECT} FROM posts p ${POST_JOINS} WHERE p.id = $1`,
@@ -145,7 +162,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // DELETE /:id - Delete own post
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', writeLimiter, auth, async (req, res) => {
   try {
     const post = await pool.query('SELECT * FROM posts WHERE id = $1', [req.params.id]);
 
@@ -166,7 +183,7 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 // POST /:id/like - Toggle like
-router.post('/:id/like', auth, async (req, res) => {
+router.post('/:id/like', writeLimiter, auth, async (req, res) => {
   try {
     const postId = req.params.id;
     const userId = req.user.id;
@@ -203,7 +220,7 @@ router.post('/:id/like', auth, async (req, res) => {
 });
 
 // GET /:id/comments - Get comments for a post
-router.get('/:id/comments', async (req, res) => {
+router.get('/:id/comments', readLimiter, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT c.*, u.first_name, u.last_name, u.username, u.avatar_url
@@ -221,7 +238,7 @@ router.get('/:id/comments', async (req, res) => {
 });
 
 // POST /:id/comments - Add a comment
-router.post('/:id/comments', auth, async (req, res) => {
+router.post('/:id/comments', writeLimiter, auth, async (req, res) => {
   try {
     const { content, media_url, media_type } = req.body;
 
