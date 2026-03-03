@@ -27,6 +27,21 @@ if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
 }
 
 /**
+ * Basic HTML-escape helper to safely embed text into HTML content.
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
  * Send an email. Silently skips if SMTP is not configured.
  * @param {{ to: string, subject: string, html?: string, text?: string }} opts
  */
@@ -51,4 +66,4 @@ function isConfigured() {
   return !!transporter;
 }
 
-module.exports = { sendMail, isConfigured };
+module.exports = { sendMail, isConfigured, escapeHtml };
