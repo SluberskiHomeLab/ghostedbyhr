@@ -2,10 +2,27 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
+
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+const profileWriteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
 
 // Multer config — store to disk, one file per user per type
 const storage = multer.diskStorage({
@@ -33,7 +50,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // GET /search?q= - Search users by name or username (must come before /:id)
-router.get('/search', async (req, res) => {
+router.get('/search', readLimiter, async (req, res) => {
   try {
     const { q = '' } = req.query;
     if (!q.trim()) return res.json([]);
@@ -55,7 +72,7 @@ router.get('/search', async (req, res) => {
 });
 
 // GET /:id - Get user profile
-router.get('/:id', async (req, res) => {
+router.get('/:id', readLimiter, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id, email, first_name, last_name, username, headline, bio, location, avatar_url, banner_url, created_at
@@ -71,7 +88,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // PUT /:id - Update own profile
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', profileWriteLimiter, auth, async (req, res) => {
   try {
     if (parseInt(req.params.id, 10) !== req.user.id)
       return res.status(403).json({ error: 'Not authorized to update this profile' });
@@ -113,7 +130,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // POST /:id/avatar - Upload profile picture
-router.post('/:id/avatar', auth, (req, res, next) => {
+router.post('/:id/avatar', profileWriteLimiter, auth, (req, res, next) => {
   if (parseInt(req.params.id, 10) !== req.user.id) {
     return res.status(403).json({ error: 'Not authorized' });
   }
@@ -135,7 +152,7 @@ router.post('/:id/avatar', auth, (req, res, next) => {
 });
 
 // POST /:id/banner - Upload banner image
-router.post('/:id/banner', auth, (req, res, next) => {
+router.post('/:id/banner', profileWriteLimiter, auth, (req, res, next) => {
   if (parseInt(req.params.id, 10) !== req.user.id) {
     return res.status(403).json({ error: 'Not authorized' });
   }
