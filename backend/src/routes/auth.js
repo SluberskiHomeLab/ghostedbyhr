@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
 const { JWT_SECRET } = require('../config/secrets');
-const { sendMail } = require('../config/mailer');
-const rateLimit = require('express-rate-limit');
+const { sendMail, escapeHtml } = require('../config/mailer');
 
 const router = express.Router();
 
@@ -194,8 +193,10 @@ router.put('/change-email', accountChangeLimiter, auth, async (req, res) => {
     sendMail({
       to: user.email,
       subject: 'Your Ghosted By HR email address was changed',
-      html: `<p>Hi ${user.first_name},</p>
-             <p>The email address on your account was changed to <strong>${normalizedEmail}</strong>. If you did not do this, please contact support immediately.</p>`,
+      html: `<p>Hi ${escapeHtml(user.first_name)},</p>
+             <p>The email address on your account was changed to <strong>${escapeHtml(
+               normalizedEmail
+             )}</strong>. If you did not do this, please contact support immediately.</p>`,
       text: `Hi ${user.first_name},\n\nThe email on your account was changed to ${normalizedEmail}. If you did not do this, please contact support immediately.`,
     }).catch((err) => console.error('Failed to send email-change notification:', err.message));
 
