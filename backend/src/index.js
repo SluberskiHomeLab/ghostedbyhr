@@ -4,6 +4,7 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const pool = require('./config/database');
 const { setupSocketIO } = require('./config/socketio');
 
@@ -26,7 +27,15 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.get('/api/health', async (req, res) => {
+const healthLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
+app.get('/api/health', healthLimiter, async (req, res) => {
   if (!dbReady) {
     return res.status(503).json({ status: 'unavailable', message: 'Database not connected' });
   }
