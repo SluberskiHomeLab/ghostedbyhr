@@ -5,8 +5,17 @@ const pool = require('../config/database');
 const auth = require('../middleware/auth');
 const { JWT_SECRET } = require('../config/secrets');
 const { sendMail } = require('../config/mailer');
+const rateLimit = require('express-rate-limit');
 
 const router = express.Router();
+
+const accountChangeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 account-change requests per windowMs
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: { error: 'Too many account change attempts, please try again later' },
+});
 
 // POST /register
 router.post('/register', async (req, res) => {
@@ -100,7 +109,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // PUT /change-password
-router.put('/change-password', auth, async (req, res) => {
+router.put('/change-password', accountChangeLimiter, auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -147,7 +156,7 @@ router.put('/change-password', auth, async (req, res) => {
 });
 
 // PUT /change-email
-router.put('/change-email', auth, async (req, res) => {
+router.put('/change-email', accountChangeLimiter, auth, async (req, res) => {
   try {
     const { newEmail, password } = req.body;
 
