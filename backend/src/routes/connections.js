@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
+const { createNotification } = require('../utils/notify');
 
 const router = express.Router();
 
@@ -40,6 +41,8 @@ router.post('/', auth, async (req, res) => {
       [req.user.id, receiver_id]
     );
 
+    createNotification({ recipientId: receiver_id, actorId: req.user.id, type: 'connection_request' }).catch(() => {});
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Send connection error:', err.message);
@@ -73,6 +76,10 @@ router.put('/:id', auth, async (req, res) => {
       `UPDATE connections SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
       [status, req.params.id]
     );
+
+    if (status === 'accepted') {
+      createNotification({ recipientId: connection.rows[0].requester_id, actorId: req.user.id, type: 'connection_accepted' }).catch(() => {});
+    }
 
     res.json(result.rows[0]);
   } catch (err) {

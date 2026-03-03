@@ -1,17 +1,23 @@
 require('dotenv').config();
 
+const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const pool = require('./config/database');
+const { setupSocketIO } = require('./config/socketio');
 
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/posts');
 const userRoutes = require('./routes/users');
 const connectionRoutes = require('./routes/connections');
 const uploadRoutes = require('./routes/upload');
+const notificationRoutes = require('./routes/notifications');
+const hashtagRoutes = require('./routes/hashtags');
 
 const app = express();
+const httpServer = http.createServer(app);
+setupSocketIO(httpServer);
 const PORT = process.env.PORT || 5000;
 
 let dbReady = false;
@@ -37,6 +43,8 @@ app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/connections', connectionRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/hashtags', hashtagRoutes);
 
 pool.connect()
   .then(async (client) => {
@@ -49,8 +57,46 @@ pool.connect()
     await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS media_type VARCHAR(20)`);
     await pool.query(`ALTER TABLE comments ADD COLUMN IF NOT EXISTS media_url VARCHAR(1000)`);
     await pool.query(`ALTER TABLE comments ADD COLUMN IF NOT EXISTS media_type VARCHAR(20)`);
+    // Migrate: notifications tables
+    await pool.query(`CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      actor_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      type VARCHAR(40) NOT NULL,
+      post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+      comment_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+      read BOOLEAN DEFAULT false,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS user_notification_settings (
+      user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      web_notifications BOOLEAN DEFAULT true,
+      email_notifications BOOLEAN DEFAULT false,
+      notify_likes BOOLEAN DEFAULT true,
+      notify_comments BOOLEAN DEFAULT true,
+      notify_mentions BOOLEAN DEFAULT true,
+      notify_connections BOOLEAN DEFAULT true
+    )`);
+    // Migrate: username, visibility, hashtags
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50)`);
+    await pool.query(`UPDATE users SET username = LOWER(regexp_replace(first_name, '[^a-zA-Z0-9]', '', 'g') || '.' || regexp_replace(last_name, '[^a-zA-Z0-9]', '', 'g') || '.' || id) WHERE username IS NULL`);
+    await pool.query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS visibility VARCHAR(20) NOT NULL DEFAULT 'public'`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS hashtags (
+      id SERIAL PRIMARY KEY,
+      tag VARCHAR(100) UNIQUE NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS post_hashtags (
+      post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+      hashtag_id INTEGER REFERENCES hashtags(id) ON DELETE CASCADE,
+      created_at TIMESTAMP DEFAULT NOW(),
+      PRIMARY KEY (post_id, hashtag_id)
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_post_hashtags_hashtag_id ON post_hashtags(hashtag_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_posts_visibility ON posts(visibility)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
     dbReady = true;
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
@@ -59,4 +105,4 @@ pool.connect()
     process.exit(1);
   });
 
-module.exports = app;
+module.exports = { app, httpServer };

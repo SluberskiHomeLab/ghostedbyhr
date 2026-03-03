@@ -3,14 +3,19 @@
   background-color: #f0f2f5;
 }
 
-.feed-container {
-  max-width: 680px;
+.feed-layout {
+  max-width: 980px;
   margin: 0 auto;
   padding: 24px 16px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
 .feed-main {
   width: 100%;
+  min-width: 0;
 }
 
 .feed-loading,
@@ -25,4 +30,10 @@
 
 .feed-empty p {
   font-size: 1rem;
+}
+
+@media (max-width: 700px) {
+  .feed-layout {
+    grid-template-columns: 1fr;
+  }
 }

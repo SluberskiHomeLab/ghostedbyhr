@@ -121,3 +121,37 @@
   text-align: center;
   padding: 4px 0 8px;
 }
+
+/* Notification settings */
+.notif-settings-group {
+  margin-bottom: 16px;
+}
+
+.notif-settings-section {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6c63ff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 10px;
+}
+
+.notif-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  color: #333;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 12px;
+}
+
+.notif-toggle-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #6c63ff;
+  cursor: pointer;
+  flex-shrink: 0;
+}

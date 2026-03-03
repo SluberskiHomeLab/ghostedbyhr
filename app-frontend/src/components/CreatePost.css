@@ -151,3 +151,69 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Textarea wrapper for mention dropdown positioning */
+.create-post-textarea-wrap {
+  position: relative;
+}
+
+/* @mention dropdown */
+.mention-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  z-index: 200;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.mention-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+.mention-suggestion:hover {
+  background: #f3f0ff;
+}
+
+.mention-suggestion-name {
+  font-weight: 600;
+  color: #222;
+}
+
+.mention-suggestion-username {
+  color: #6c63ff;
+  font-size: 0.82rem;
+}
+
+/* Visibility toggle button */
+.visibility-btn {
+  background: #f3f0ff;
+  border: 1px solid #c5c0f5;
+  color: #6c63ff;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.visibility-btn:hover {
+  background: #e8e4ff;
+  border-color: #6c63ff;
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -175,6 +175,96 @@ function ChangePasswordForm() {
   );
 }
 
+function NotificationSettingsForm() {
+  const defaultSettings = {
+    web_notifications: true,
+    email_notifications: false,
+    notify_likes: true,
+    notify_comments: true,
+    notify_mentions: true,
+    notify_connections: true,
+  };
+  const [settings, setSettings] = useState(defaultSettings);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    api.get('/notifications/settings')
+      .then(res => setSettings(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const toggle = (key) => setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setSaving(true);
+    try {
+      await api.put('/notifications/settings', settings);
+      setSuccess('Notification preferences saved.');
+    } catch {
+      setError('Failed to save notification preferences.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="settings-card">
+      <h2>Notification Preferences</h2>
+      {loading ? <p>Loading…</p> : (
+        <form onSubmit={handleSave} className="settings-form">
+          {error && <div className="settings-error">{error}</div>}
+
+          <div className="notif-settings-group">
+            <h3 className="notif-settings-section">Delivery</h3>
+            <label className="notif-toggle-row">
+              <span>Web notifications (in-app)</span>
+              <input type="checkbox" checked={settings.web_notifications} onChange={() => toggle('web_notifications')} />
+            </label>
+            <label className="notif-toggle-row">
+              <span>Email notifications</span>
+              <input type="checkbox" checked={settings.email_notifications} onChange={() => toggle('email_notifications')} />
+            </label>
+          </div>
+
+          <div className="notif-settings-group">
+            <h3 className="notif-settings-section">Notify me about</h3>
+            <label className="notif-toggle-row">
+              <span>Likes on my posts</span>
+              <input type="checkbox" checked={settings.notify_likes} onChange={() => toggle('notify_likes')} />
+            </label>
+            <label className="notif-toggle-row">
+              <span>Comments on my posts</span>
+              <input type="checkbox" checked={settings.notify_comments} onChange={() => toggle('notify_comments')} />
+            </label>
+            <label className="notif-toggle-row">
+              <span>Mentions</span>
+              <input type="checkbox" checked={settings.notify_mentions} onChange={() => toggle('notify_mentions')} />
+            </label>
+            <label className="notif-toggle-row">
+              <span>Connection requests &amp; acceptances</span>
+              <input type="checkbox" checked={settings.notify_connections} onChange={() => toggle('notify_connections')} />
+            </label>
+          </div>
+
+          <div className="settings-form-footer">
+            <button type="submit" className="settings-save-btn" disabled={saving}>
+              {saving ? 'Saving…' : 'Save Preferences'}
+            </button>
+            {success && <span className="settings-success">✓ {success}</span>}
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
 function AccountSettingsPage() {
   const { user } = useAuth();
 
@@ -185,6 +275,7 @@ function AccountSettingsPage() {
         <h1>Account Settings</h1>
         <ChangeEmailForm currentEmail={user?.email || ''} />
         <ChangePasswordForm />
+        <NotificationSettingsForm />
         <p className="smtp-note">
           Email confirmations are sent when you change your email or password, if your server has SMTP configured.
         </p>

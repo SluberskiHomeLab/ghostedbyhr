@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import MediaEmbed, { extractMediaUrl, detectMedia } from './MediaEmbed';
 import './PostCard.css';
@@ -22,7 +22,38 @@ function timeAgo(dateString) {
   return `${months}mo ago`;
 }
 
+function renderContent(text, navigate) {
+  if (!text) return null;
+  const parts = text.split(/(#[a-zA-Z0-9_]+|@[a-zA-Z0-9_.]+)/g);
+  return parts.map((part, i) => {
+    if (/^#[a-zA-Z0-9_]+$/.test(part)) {
+      return (
+        <span
+          key={i}
+          className="hashtag"
+          onClick={() => navigate(`/search?q=${encodeURIComponent(part)}`)}
+        >
+          {part}
+        </span>
+      );
+    }
+    if (/^@[a-zA-Z0-9_.]+$/.test(part)) {
+      return (
+        <span
+          key={i}
+          className="mention"
+          onClick={() => navigate(`/search?q=${encodeURIComponent(part)}`)}
+        >
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
 function PostCard({ post, onUpdate }) {
+  const navigate = useNavigate();
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -142,7 +173,7 @@ function PostCard({ post, onUpdate }) {
       </div>
 
       <div className="post-content">
-        {post.content && <p>{post.content}</p>}
+        {post.content && <p>{renderContent(post.content, navigate)}</p>}
         {postMediaUrl && (
           <MediaEmbed
             url={postMediaUrl}
@@ -182,7 +213,7 @@ function PostCard({ post, onUpdate }) {
                   <span className="comment-author">
                     {comment.first_name} {comment.last_name}
                   </span>
-                  {comment.content && <p className="comment-text">{comment.content}</p>}
+                  {comment.content && <p className="comment-text">{renderContent(comment.content, navigate)}</p>}
                   {cmtMediaUrl && (
                     <MediaEmbed
                       url={cmtMediaUrl}

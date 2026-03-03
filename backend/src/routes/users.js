@@ -32,19 +32,37 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
 
+// GET /search?q= - Search users by name or username (must come before /:id)
+router.get('/search', async (req, res) => {
+  try {
+    const { q = '' } = req.query;
+    if (!q.trim()) return res.json([]);
+    const search = `%${q.trim()}%`;
+    const result = await pool.query(
+      `SELECT id, first_name, last_name, username, headline, avatar_url
+       FROM users
+       WHERE first_name ILIKE $1 OR last_name ILIKE $1 OR username ILIKE $1
+          OR (first_name || ' ' || last_name) ILIKE $1
+       ORDER BY first_name, last_name
+       LIMIT 10`,
+      [search]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('User search error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /:id - Get user profile
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, email, first_name, last_name, headline, bio, location, avatar_url, banner_url, created_at
+      `SELECT id, email, first_name, last_name, username, headline, bio, location, avatar_url, banner_url, created_at
        FROM users WHERE id = $1`,
       [req.params.id]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Get user error:', err.message);
@@ -55,27 +73,38 @@ router.get('/:id', async (req, res) => {
 // PUT /:id - Update own profile
 router.put('/:id', auth, async (req, res) => {
   try {
-    if (parseInt(req.params.id, 10) !== req.user.id) {
+    if (parseInt(req.params.id, 10) !== req.user.id)
       return res.status(403).json({ error: 'Not authorized to update this profile' });
-    }
 
-    const { first_name, last_name, headline, bio, location, avatar_url, banner_url } = req.body;
+    const { first_name, last_name, username, headline, bio, location, avatar_url, banner_url } = req.body;
+
+    // Validate username if provided
+    if (username !== undefined) {
+      if (!/^[a-zA-Z0-9_.]{3,30}$/.test(username)) {
+        return res.status(400).json({ error: 'Username must be 3-30 characters: letters, numbers, dots, underscores only' });
+      }
+      const existing = await pool.query(
+        'SELECT id FROM users WHERE LOWER(username) = LOWER($1) AND id != $2',
+        [username, req.params.id]
+      );
+      if (existing.rows.length > 0) return res.status(409).json({ error: 'Username already taken' });
+    }
 
     const result = await pool.query(
       `UPDATE users
        SET first_name = COALESCE($1, first_name),
-           last_name = COALESCE($2, last_name),
-           headline = COALESCE($3, headline),
-           bio = COALESCE($4, bio),
-           location = COALESCE($5, location),
-           avatar_url = COALESCE($6, avatar_url),
-           banner_url = COALESCE($7, banner_url),
+           last_name  = COALESCE($2, last_name),
+           username   = COALESCE($3, username),
+           headline   = COALESCE($4, headline),
+           bio        = COALESCE($5, bio),
+           location   = COALESCE($6, location),
+           avatar_url = COALESCE($7, avatar_url),
+           banner_url = COALESCE($8, banner_url),
            updated_at = NOW()
-       WHERE id = $8
-       RETURNING id, email, first_name, last_name, headline, bio, location, avatar_url, banner_url, created_at`,
-      [first_name, last_name, headline, bio, location, avatar_url, banner_url, req.params.id]
+       WHERE id = $9
+       RETURNING id, email, first_name, last_name, username, headline, bio, location, avatar_url, banner_url, created_at`,
+      [first_name, last_name, username || null, headline, bio, location, avatar_url, banner_url, req.params.id]
     );
-
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Update user error:', err.message);

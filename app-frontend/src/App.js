@@ -1,6 +1,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
+import ToastContainer from './components/ToastContainer';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -8,12 +10,15 @@ import Feed from './pages/Feed';
 import ProfilePage from './pages/ProfilePage';
 import ConnectionsPage from './pages/ConnectionsPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
+import SearchPage from './pages/SearchPage';
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
-      <div className="App">
+      <NotificationProvider>
+        <ToastContainer />
+        <div className="App">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -49,8 +54,17 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <SearchPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

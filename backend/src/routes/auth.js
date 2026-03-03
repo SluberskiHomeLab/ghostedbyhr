@@ -28,11 +28,18 @@ router.post('/register', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, first_name, last_name)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, email, first_name, last_name, headline, bio, location, avatar_url, created_at`,
+       RETURNING id, email, first_name, last_name, username, headline, bio, location, avatar_url, created_at`,
       [email, password_hash, first_name, last_name]
     );
 
     const user = result.rows[0];
+
+    // Auto-generate a unique username
+    const baseUsername = (first_name + '.' + last_name).toLowerCase().replace(/[^a-z0-9.]/g, '');
+    const uniqueUsername = `${baseUsername}.${user.id}`;
+    await pool.query('UPDATE users SET username = $1 WHERE id = $2', [uniqueUsername, user.id]);
+    user.username = uniqueUsername;
+
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ token, user });

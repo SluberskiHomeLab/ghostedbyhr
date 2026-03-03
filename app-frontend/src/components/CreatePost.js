@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import MediaEmbed, { extractMediaUrl, detectMedia } from './MediaEmbed';
@@ -13,12 +13,55 @@ function CreatePost({ onPostCreated }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [visibility, setVisibility] = useState('public');
+
+  // @mention autocomplete
+  const [mentionSuggestions, setMentionSuggestions] = useState([]);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionStart, setMentionStart] = useState(-1);
+  const textareaRef = useRef(null);
+  const mentionRef = useRef(null);
   const fileInputRef = useRef(null);
+  const mentionTimerRef = useRef(null);
+
+  // Close mention dropdown on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (mentionRef.current && !mentionRef.current.contains(e.target) &&
+          textareaRef.current && !textareaRef.current.contains(e.target)) {
+        setMentionSuggestions([]);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   // Detect an embeddable URL pasted / typed in the textarea
   const handleContentChange = useCallback((e) => {
     const val = e.target.value;
+    const cursor = e.target.selectionStart;
     setContent(val);
+
+    // @mention detection: find the most recent @ before cursor
+    const textBeforeCursor = val.slice(0, cursor);
+    const atMatch = textBeforeCursor.match(/@([a-zA-Z0-9_.]*)$/);
+    if (atMatch) {
+      const q = atMatch[1];
+      setMentionQuery(q);
+      setMentionStart(cursor - atMatch[0].length);
+      clearTimeout(mentionTimerRef.current);
+      mentionTimerRef.current = setTimeout(async () => {
+        if (q.length === 0) { setMentionSuggestions([]); return; }
+        try {
+          const res = await api.get(`/users/search?q=${encodeURIComponent(q)}`);
+          setMentionSuggestions((res.data || []).slice(0, 6));
+        } catch { setMentionSuggestions([]); }
+      }, 250);
+    } else {
+      setMentionSuggestions([]);
+      setMentionQuery('');
+      setMentionStart(-1);
+    }
 
     // Only auto-detect link if no file has been attached already
     if (!mediaUrl || detectMedia(mediaUrl)?.kind === undefined) {
@@ -40,6 +83,25 @@ function CreatePost({ onPostCreated }) {
       }
     }
   }, [mediaUrl]);
+
+  const handleMentionSelect = (username) => {
+    // Replace from mentionStart up to cursor with @username + space
+    const textarea = textareaRef.current;
+    const cursor = textarea.selectionStart;
+    const before = content.slice(0, mentionStart);
+    const after = content.slice(cursor);
+    const newVal = before + '@' + username + ' ' + after;
+    setContent(newVal);
+    setMentionSuggestions([]);
+    setMentionQuery('');
+    setMentionStart(-1);
+    // Restore focus after React re-render
+    setTimeout(() => {
+      const pos = mentionStart + username.length + 2;
+      textarea.focus();
+      textarea.setSelectionRange(pos, pos);
+    }, 0);
+  };
 
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
@@ -79,6 +141,7 @@ function CreatePost({ onPostCreated }) {
         content: content.trim(),
         media_url: mediaUrl || undefined,
         media_type: mediaType || undefined,
+        visibility,
       });
       setContent('');
       setMediaUrl('');
@@ -111,13 +174,31 @@ function CreatePost({ onPostCreated }) {
         </span>
       </div>
       <form onSubmit={handleSubmit}>
-        <textarea
-          className="create-post-textarea"
-          placeholder="Share your job search experience, vent about ghosting, or celebrate a win... Paste an image/video link to embed it."
-          value={content}
-          onChange={handleContentChange}
-          rows={3}
-        />
+        <div className="create-post-textarea-wrap">
+          <textarea
+            ref={textareaRef}
+            className="create-post-textarea"
+            placeholder="Share your job search experience, vent about ghosting, or celebrate a win... Paste an image/video link to embed it."
+            value={content}
+            onChange={handleContentChange}
+            rows={3}
+          />
+          {mentionSuggestions.length > 0 && (
+            <div className="mention-dropdown" ref={mentionRef}>
+              {mentionSuggestions.map((u) => (
+                <button
+                  key={u.id}
+                  type="button"
+                  className="mention-suggestion"
+                  onMouseDown={(e) => { e.preventDefault(); handleMentionSelect(u.username); }}
+                >
+                  <span className="mention-suggestion-name">{u.first_name} {u.last_name}</span>
+                  <span className="mention-suggestion-username">@{u.username}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Media preview */}
         {mediaUrl && (
@@ -145,6 +226,15 @@ function CreatePost({ onPostCreated }) {
             style={{ display: 'none' }}
             onChange={handleFileSelect}
           />
+          <button
+            type="button"
+            className="visibility-btn"
+            onClick={() => setVisibility(v => v === 'public' ? 'connections' : 'public')}
+            title="Toggle post visibility"
+          >
+            {visibility === 'public' ? '🌐 Public' : '👥 Connections'}
+          </button>
+
           <button
             type="button"
             className="create-post-media-btn"

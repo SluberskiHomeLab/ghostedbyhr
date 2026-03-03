@@ -260,3 +260,24 @@
 .comment-media .media-embed-video {
   padding-top: 42.25%;
 }
+
+/* Clickable hashtags and mentions in post/comment text */
+.hashtag {
+  color: #6c63ff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hashtag:hover {
+  text-decoration: underline;
+}
+
+.mention {
+  color: #4a90e2;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mention:hover {
+  text-decoration: underline;
+}
