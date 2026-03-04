@@ -9,8 +9,8 @@ const PLANS = [
   {
     tier: 'basic',
     name: 'Basic',
-    yearlyPrice: 9,
-    monthlyEquiv: '0.75',
+    yearlyPrice: 9.99,
+    monthlyEquiv: '0.83',
     highlight: false,
     badge: 'Best Value',
     description: 'Everything you need to join the conversation and share your story.',
@@ -24,8 +24,8 @@ const PLANS = [
   {
     tier: 'standard',
     name: 'Standard',
-    yearlyPrice: 29,
-    monthlyEquiv: '2.42',
+    yearlyPrice: 29.99,
+    monthlyEquiv: '2.49',
     highlight: true,
     badge: 'Most Popular',
     description: 'Enhanced tools to make your voice stand out in the community.',
@@ -39,8 +39,8 @@ const PLANS = [
   {
     tier: 'professional',
     name: 'Professional',
-    yearlyPrice: 59,
-    monthlyEquiv: '4.92',
+    yearlyPrice: 49.99,
+    monthlyEquiv: '4.17',
     highlight: false,
     badge: null,
     description: 'Built for serious job seekers who want every advantage.',
@@ -54,8 +54,8 @@ const PLANS = [
   {
     tier: 'business',
     name: 'Business',
-    yearlyPrice: 99,
-    monthlyEquiv: '8.25',
+    yearlyPrice: 89.99,
+    monthlyEquiv: '7.50',
     highlight: false,
     badge: null,
     description: 'For teams, recruiters, and organizations.',
