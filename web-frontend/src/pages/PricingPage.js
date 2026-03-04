@@ -129,7 +129,7 @@ function PricingPage() {
             <h3>Infrastructure costs</h3>
             <p>
               Servers, databases, storage, and content delivery cost real money every
-              month. Your subscription keeps everything fast, reliable, and ad-free.
+              month. Your subscription keeps everything fast, reliable, and secure.
             </p>
           </div>
           <div className="pricing-why-card">
@@ -138,7 +138,8 @@ function PricingPage() {
             <p>
               A small barrier filters out throwaway accounts and bad actors. When
               members have invested — even a tiny amount — the community stays
-              more civil, honest, and valuable for everyone.
+              more civil, honest, and valuable for everyone without having
+              to worry about spam, fake accounts, or other disruptive behavior.
             </p>
           </div>
           <div className="pricing-why-card">
@@ -239,9 +240,10 @@ function PricingPage() {
             <div className="pricing-faq-item">
               <h4>What if I just want to browse?</h4>
               <p>
-                You can create a free account to explore the platform. To post,
-                comment, and interact with the community you'll need an active
-                subscription.
+                At this point in time, to mitigate potential risks of scamming, fake posts, bots, etc,
+                browsing the platform is limited to registered users with an active subscription. This is
+                subject to change in the future as we grow and implement additional safety measures, but for now,
+                 we appreciate your understanding and support in keeping the community safe and valuable for everyone.
               </p>
             </div>
             <div className="pricing-faq-item">

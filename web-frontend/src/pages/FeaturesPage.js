@@ -39,11 +39,11 @@ function FeaturesPage() {
         <div className="feature-detail">
           <div className="feature-detail-icon">⭐</div>
           <div className="feature-detail-text">
-            <h2>Company Reviews</h2>
+            <h2>Trash Talk Companies</h2>
             <p>
-              Read honest reviews about company hiring practices. Our review system
-              covers communication quality, interview process, timeline accuracy,
-              and overall candidate experience.
+              Trash talk the companies that ghosted you. 
+              Tell them to shove their hiring process up their asses.  
+              Let the world know how you really feel about their hiring practices.
             </p>
           </div>
         </div>
@@ -62,11 +62,12 @@ function FeaturesPage() {
         <div className="feature-detail">
           <div className="feature-detail-icon">📊</div>
           <div className="feature-detail-text">
-            <h2>Company Insights</h2>
+            <h2>Company Sorting</h2>
             <p>
-              View aggregated data on company response rates, average time to hear back,
-              and candidate satisfaction scores. Make informed decisions about where to
-              apply next.
+              Sort posts by company they are trashing.  
+              Want to see all the posts trashing Google?  
+              No problem.  Want to see all the posts trashing Amazon?  
+              We got you.
             </p>
           </div>
         </div>
