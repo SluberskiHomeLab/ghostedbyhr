@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import FeaturesPage from './pages/FeaturesPage';
 import AccountPage from './pages/AccountPage';
+import PricingPage from './pages/PricingPage';
 import './App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
         </Routes>
       </div>
     </AuthProvider>

@@ -18,6 +18,7 @@ function Footer() {
           <h4>Navigation</h4>
           <Link to="/" className="footer-link">Home</Link>
           <Link to="/features" className="footer-link">Features</Link>
+          <Link to="/pricing" className="footer-link">Pricing</Link>
           <Link to="/about" className="footer-link">About</Link>
         </div>
         <div className="footer-section">

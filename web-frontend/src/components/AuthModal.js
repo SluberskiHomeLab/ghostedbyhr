@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './AuthModal.css';
 
 function AuthModal() {
   const { modal, login, register, hideModal } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState(modal);
 
   const [email, setEmail] = useState('');
@@ -60,7 +62,6 @@ function AuthModal() {
     try {
       if (mode === 'login') {
         await login(email, password);
-        hideModal();
       } else {
         if (password.length < 6) {
           setError('Password must be at least 6 characters.');
@@ -71,7 +72,13 @@ function AuthModal() {
           return;
         }
         await register(email, password, firstName, lastName);
-        hideModal();
+      }
+      hideModal();
+      // Handle post-login redirect (e.g. from pricing page "Get Started")
+      const redirect = sessionStorage.getItem('post_login_redirect');
+      if (redirect) {
+        sessionStorage.removeItem('post_login_redirect');
+        navigate(redirect);
       }
     } catch (err) {
       setError(
