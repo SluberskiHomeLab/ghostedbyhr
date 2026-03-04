@@ -75,7 +75,7 @@ router.get('/search', readLimiter, async (req, res) => {
 router.get('/:id', readLimiter, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, email, first_name, last_name, username, headline, bio, location, avatar_url, banner_url, created_at
+      `SELECT id, email, first_name, last_name, username, headline, bio, location, address, avatar_url, banner_url, created_at
        FROM users WHERE id = $1`,
       [req.params.id]
     );
@@ -93,7 +93,7 @@ router.put('/:id', profileWriteLimiter, auth, async (req, res) => {
     if (parseInt(req.params.id, 10) !== req.user.id)
       return res.status(403).json({ error: 'Not authorized to update this profile' });
 
-    const { first_name, last_name, username, headline, bio, location, avatar_url, banner_url } = req.body;
+    const { first_name, last_name, username, headline, bio, location, address, avatar_url, banner_url } = req.body;
 
     // Validate username if provided
     if (username !== undefined) {
@@ -115,12 +115,13 @@ router.put('/:id', profileWriteLimiter, auth, async (req, res) => {
            headline   = COALESCE($4, headline),
            bio        = COALESCE($5, bio),
            location   = COALESCE($6, location),
-           avatar_url = COALESCE($7, avatar_url),
-           banner_url = COALESCE($8, banner_url),
+           address    = COALESCE($7, address),
+           avatar_url = COALESCE($8, avatar_url),
+           banner_url = COALESCE($9, banner_url),
            updated_at = NOW()
-       WHERE id = $9
-       RETURNING id, email, first_name, last_name, username, headline, bio, location, avatar_url, banner_url, created_at`,
-      [first_name, last_name, username || null, headline, bio, location, avatar_url, banner_url, req.params.id]
+       WHERE id = $10
+       RETURNING id, email, first_name, last_name, username, headline, bio, location, address, avatar_url, banner_url, created_at`,
+      [first_name, last_name, username || null, headline, bio, location, address, avatar_url, banner_url, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (err) {

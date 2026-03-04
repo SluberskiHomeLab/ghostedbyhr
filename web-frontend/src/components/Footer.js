@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import config from '../config';
 import './Footer.css';
 
 function Footer() {
+  const { user, showModal } = useAuth();
+
   return (
     <footer className="footer">
       <div className="footer-container">
@@ -19,8 +22,18 @@ function Footer() {
         </div>
         <div className="footer-section">
           <h4>Account</h4>
-          <a href={`${config.APP_URL}/login`} className="footer-link">Sign In</a>
-          <a href={`${config.APP_URL}/register`} className="footer-link">Sign Up</a>
+          {user ? (
+            <>
+              <a href={config.APP_URL} className="footer-link">Go to App</a>
+              <Link to="/account" className="footer-link">Account Settings</Link>
+              <Link to="/account?tab=billing" className="footer-link">Billing</Link>
+            </>
+          ) : (
+            <>
+              <button className="footer-link footer-link-btn" onClick={() => showModal('login')}>Sign In</button>
+              <button className="footer-link footer-link-btn" onClick={() => showModal('register')}>Sign Up</button>
+            </>
+          )}
         </div>
       </div>
       <div className="footer-bottom">

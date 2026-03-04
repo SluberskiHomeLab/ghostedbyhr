@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const pool = require('../config/database');
 const auth = require('../middleware/auth');
-const { JWT_SECRET } = require('../config/secrets');
+const { JWT_SECRET, WEB_FRONTEND_URL } = require('../config/secrets');
 const { sendMail, escapeHtml } = require('../config/mailer');
 
 const router = express.Router();
@@ -108,7 +108,8 @@ router.post('/login', authLimiter, async (req, res) => {
 router.get('/me', readLimiter, auth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, email, first_name, last_name, headline, bio, location, avatar_url, created_at
+      `SELECT id, email, first_name, last_name, username, headline, bio, location, address, avatar_url, banner_url,
+              subscription_status, subscription_tier, subscription_expires_at, created_at
        FROM users WHERE id = $1`,
       [req.user.id]
     );
@@ -120,6 +121,44 @@ router.get('/me', readLimiter, auth, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Get me error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /app-login  — login gated by active subscription
+router.post('/app-login', authLimiter, async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const user = result.rows[0];
+    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const activeStatuses = ['active', 'trialing'];
+    if (!activeStatuses.includes(user.subscription_status)) {
+      return res.status(402).json({
+        error: 'Please subscribe to use this platform',
+        subscriptionRequired: true,
+        redirectUrl: `${WEB_FRONTEND_URL}/account?tab=billing`,
+      });
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const { password_hash, ...userWithoutPassword } = user;
+    res.json({ token, user: userWithoutPassword });
+  } catch (err) {
+    console.error('App-login error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
