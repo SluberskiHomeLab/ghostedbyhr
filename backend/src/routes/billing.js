@@ -134,7 +134,7 @@ router.post('/portal', billingLimiter, auth, async (req, res) => {
 });
 
 // POST /api/billing/webhook  (raw body — mounted before express.json())
-router.post('/webhook', async (req, res) => {
+router.post('/webhook', billingLimiter, async (req, res) => {
   if (!stripe) {
     return res.status(503).json({ error: 'Stripe is not configured' });
   }
