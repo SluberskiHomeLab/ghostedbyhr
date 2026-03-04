@@ -25,6 +25,14 @@ const authLimiter = rateLimit({
   message: { error: 'Too many attempts, please try again later' },
 });
 
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
+
 // POST /register
 router.post('/register', authLimiter, async (req, res) => {
   try {
@@ -97,7 +105,7 @@ router.post('/login', authLimiter, async (req, res) => {
 });
 
 // GET /me
-router.get('/me', auth, async (req, res) => {
+router.get('/me', readLimiter, auth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id, email, first_name, last_name, headline, bio, location, avatar_url, created_at
