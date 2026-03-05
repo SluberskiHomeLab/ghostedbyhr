@@ -196,11 +196,12 @@ router.post('/webhook', billingLimiter, async (req, res) => {
         const customer = await stripe.customers.retrieve(sub.customer);
         const userId = customer.metadata?.userId;
         if (userId) {
+          const expiresAt = new Date(sub.current_period_end * 1000);
           await pool.query(
             `UPDATE users
-             SET subscription_status = 'canceled', subscription_expires_at = NOW()
-             WHERE id = $1`,
-            [parseInt(userId, 10)]
+             SET subscription_status = 'canceled', subscription_expires_at = $1
+             WHERE id = $2`,
+            [expiresAt, parseInt(userId, 10)]
           );
         }
         break;
