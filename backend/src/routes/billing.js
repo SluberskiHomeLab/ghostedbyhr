@@ -139,6 +139,11 @@ router.post('/webhook', billingLimiter, async (req, res) => {
     return res.status(503).json({ error: 'Stripe is not configured' });
   }
 
+  if (!STRIPE_WEBHOOK_SECRET) {
+    console.error('Webhook configuration error: STRIPE_WEBHOOK_SECRET is not set');
+    return res.status(503).json({ error: 'Webhook configuration error' });
+  }
+
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -146,7 +151,7 @@ router.post('/webhook', billingLimiter, async (req, res) => {
     event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Webhook signature error:', err.message);
-    return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+    return res.status(400).json({ error: 'Webhook signature verification failed' });
   }
 
   try {
