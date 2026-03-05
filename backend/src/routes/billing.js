@@ -57,12 +57,16 @@ router.post('/checkout', billingLimiter, auth, async (req, res) => {
 
   try {
     const { tier } = req.body;
-    const priceId = TIER_PRICE_MAP[tier];
 
-    if (!priceId) {
+    const isKnownTier = Object.prototype.hasOwnProperty.call(TIER_PRICE_MAP, tier);
+    if (!isKnownTier) {
       return res.status(400).json({ error: 'Invalid subscription tier. Must be basic, standard, professional, or business.' });
     }
 
+    const priceId = TIER_PRICE_MAP[tier];
+    if (!priceId) {
+      return res.status(503).json({ error: 'Subscription tier is configured but Stripe price is not set. Please try again later.' });
+    }
     const userResult = await pool.query(
       'SELECT id, email, first_name, last_name, stripe_customer_id FROM users WHERE id = $1',
       [req.user.id]
