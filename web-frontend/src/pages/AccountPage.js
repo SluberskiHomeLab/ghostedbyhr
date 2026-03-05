@@ -193,15 +193,22 @@ function NotificationSettingsForm() {
   };
   const [settings, setSettings] = useState(defaultSettings);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  const fetchSettings = () => {
+    setLoading(true);
+    setLoadError(false);
     api.get('/notifications/settings')
       .then((res) => setSettings(res.data))
-      .catch(() => {})
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchSettings();
   }, []);
 
   const toggle = (key) => setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -229,7 +236,12 @@ function NotificationSettingsForm() {
   return (
     <div className="acct-card">
       <h2>Notification Preferences</h2>
-      {loading ? <p>Loading…</p> : (
+      {loading ? <p>Loading…</p> : loadError ? (
+        <div className="acct-error">
+          Failed to load notification preferences.{' '}
+          <button type="button" className="acct-retry-btn" onClick={fetchSettings}>Retry</button>
+        </div>
+      ) : (
         <form onSubmit={handleSave} className="acct-form">
           {error && <div className="acct-error">{error}</div>}
           <div className="notif-group">
