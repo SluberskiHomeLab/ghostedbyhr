@@ -57,12 +57,16 @@ router.post('/checkout', billingLimiter, auth, async (req, res) => {
 
   try {
     const { tier } = req.body;
-    const priceId = TIER_PRICE_MAP[tier];
 
-    if (!priceId) {
+    const isKnownTier = Object.prototype.hasOwnProperty.call(TIER_PRICE_MAP, tier);
+    if (!isKnownTier) {
       return res.status(400).json({ error: 'Invalid subscription tier. Must be basic, standard, professional, or business.' });
     }
 
+    const priceId = TIER_PRICE_MAP[tier];
+    if (!priceId) {
+      return res.status(503).json({ error: 'Subscription tier is configured but Stripe price is not set. Please try again later.' });
+    }
     const userResult = await pool.query(
       'SELECT id, email, first_name, last_name, stripe_customer_id FROM users WHERE id = $1',
       [req.user.id]
@@ -181,7 +185,9 @@ router.post('/webhook', billingLimiter, async (req, res) => {
           const expiresAt = new Date(sub.current_period_end * 1000);
           // Derive tier from price id
           const priceId = sub.items.data[0]?.price?.id;
-          const tier = Object.entries(TIER_PRICE_MAP).find(([, v]) => v === priceId)?.[0] || null;
+          const tier = priceId
+            ? (Object.entries(TIER_PRICE_MAP).find(([, v]) => v && v === priceId)?.[0] || null)
+            : null;
           await pool.query(
             `UPDATE users
              SET subscription_status = $1, subscription_tier = $2, subscription_expires_at = $3
