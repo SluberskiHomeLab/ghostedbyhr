@@ -178,7 +178,9 @@ router.post('/webhook', billingLimiter, async (req, res) => {
           const expiresAt = new Date(sub.current_period_end * 1000);
           // Derive tier from price id
           const priceId = sub.items.data[0]?.price?.id;
-          const tier = Object.entries(TIER_PRICE_MAP).find(([, v]) => v === priceId)?.[0] || null;
+          const tier = priceId
+            ? (Object.entries(TIER_PRICE_MAP).find(([, v]) => v && v === priceId)?.[0] || null)
+            : null;
           await pool.query(
             `UPDATE users
              SET subscription_status = $1, subscription_tier = $2, subscription_expires_at = $3
