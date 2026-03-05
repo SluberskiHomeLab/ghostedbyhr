@@ -171,9 +171,12 @@ router.post('/webhook', billingLimiter, async (req, res) => {
 
       case 'customer.subscription.updated': {
         const sub = event.data.object;
-        const customer = await stripe.customers.retrieve(sub.customer);
-        const userId = customer.metadata?.userId;
-        if (userId) {
+        const userResult = await pool.query(
+          'SELECT id FROM users WHERE stripe_customer_id = $1',
+          [sub.customer]
+        );
+        if (userResult.rows.length > 0) {
+          const userId = userResult.rows[0].id;
           const status = sub.status; // active, trialing, past_due, canceled, etc.
           const expiresAt = new Date(sub.current_period_end * 1000);
           // Derive tier from price id
@@ -183,7 +186,7 @@ router.post('/webhook', billingLimiter, async (req, res) => {
             `UPDATE users
              SET subscription_status = $1, subscription_tier = $2, subscription_expires_at = $3
              WHERE id = $4`,
-            [status, tier, expiresAt, parseInt(userId, 10)]
+            [status, tier, expiresAt, userId]
           );
         }
         break;
@@ -191,14 +194,17 @@ router.post('/webhook', billingLimiter, async (req, res) => {
 
       case 'customer.subscription.deleted': {
         const sub = event.data.object;
-        const customer = await stripe.customers.retrieve(sub.customer);
-        const userId = customer.metadata?.userId;
-        if (userId) {
+        const userResult = await pool.query(
+          'SELECT id FROM users WHERE stripe_customer_id = $1',
+          [sub.customer]
+        );
+        if (userResult.rows.length > 0) {
+          const userId = userResult.rows[0].id;
           await pool.query(
             `UPDATE users
              SET subscription_status = 'canceled', subscription_expires_at = NOW()
              WHERE id = $1`,
-            [parseInt(userId, 10)]
+            [userId]
           );
         }
         break;
