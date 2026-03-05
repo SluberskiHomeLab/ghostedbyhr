@@ -153,7 +153,7 @@ router.post('/webhook', billingLimiter, async (req, res) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        if (session.mode === 'subscription' && session.payment_status === 'paid') {
+        if (session.mode === 'subscription' && session.subscription) {
           const { userId, tier } = session.metadata || {};
           if (userId) {
             const subscription = await stripe.subscriptions.retrieve(session.subscription);
@@ -162,7 +162,7 @@ router.post('/webhook', billingLimiter, async (req, res) => {
               `UPDATE users
                SET subscription_status = $1, subscription_tier = $2, subscription_expires_at = $3
                WHERE id = $4`,
-              ['active', tier, expiresAt, parseInt(userId, 10)]
+              [subscription.status, tier, expiresAt, parseInt(userId, 10)]
             );
           }
         }
