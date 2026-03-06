@@ -72,9 +72,10 @@ router.post('/checkout', billingLimiter, auth, async (req, res) => {
     }
     const user = userResult.rows[0];
 
-    if (user.subscription_status === 'active') {
+    const activeStatuses = ['active', 'trialing'];
+    if (activeStatuses.includes(user.subscription_status)) {
       return res.status(409).json({
-        error: 'You already have an active subscription. Please use the billing portal to manage your subscription.',
+        error: 'You already have an active or trialing subscription. Please use the billing portal to manage your subscription.',
       });
     }
 
