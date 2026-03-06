@@ -68,13 +68,20 @@ router.post('/checkout', billingLimiter, auth, async (req, res) => {
       return res.status(503).json({ error: 'Subscription tier is configured but Stripe price is not set. Please try again later.' });
     }
     const userResult = await pool.query(
-      'SELECT id, email, first_name, last_name, stripe_customer_id FROM users WHERE id = $1',
+      'SELECT id, email, first_name, last_name, stripe_customer_id, subscription_status FROM users WHERE id = $1',
       [req.user.id]
     );
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
     const user = userResult.rows[0];
+
+    const activeStatuses = ['active', 'trialing'];
+    if (activeStatuses.includes(user.subscription_status)) {
+      return res.status(409).json({
+        error: 'You already have an active or trialing subscription. Please use the billing portal to manage your subscription.',
+      });
+    }
 
     // Create or reuse Stripe customer
     let customerId = user.stripe_customer_id;
