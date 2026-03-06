@@ -285,6 +285,24 @@
   align-self: flex-start;
 }
 
+.billing-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.billing-sync-btn {
+  font-size: 0.85rem;
+  color: #aaaaaa;
+  text-decoration: none;
+}
+
+.billing-sync-btn:hover {
+  color: #cccccc;
+}
+
 .billing-manage-note {
   color: #aaaaaa;
   font-size: 0.9rem;

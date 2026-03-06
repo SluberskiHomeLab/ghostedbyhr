@@ -388,7 +388,9 @@ function BillingTab({ user, refreshUser }) {
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState('');
+  const [syncMessage, setSyncMessage] = useState('');
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -406,21 +408,34 @@ function BillingTab({ user, refreshUser }) {
     }
   }, []);
 
-  useEffect(() => {
-    fetchStatus();
-  }, [fetchStatus]);
+  const handleSync = useCallback(async (silent = false) => {
+    if (!silent) setSyncing(true);
+    setSyncMessage('');
+    try {
+      const res = await api.post('/billing/sync');
+      setBillingStatus(res.data);
+      await refreshUser();
+      if (!silent) {
+        const active = ['active', 'trialing'].includes(res.data.subscription_status);
+        setSyncMessage(active ? 'Subscription synced successfully!' : 'No active subscription found in Stripe.');
+      }
+    } catch (err) {
+      if (!silent) setSyncMessage(err.response?.data?.error || 'Sync failed. Please try again.');
+    } finally {
+      if (!silent) setSyncing(false);
+      setLoadingStatus(false);
+    }
+  }, [refreshUser]);
 
   useEffect(() => {
     if (checkoutSuccess) {
-      // Refresh until status becomes active (webhook may be slightly delayed)
-      const interval = setInterval(async () => {
-        await fetchStatus();
-        await refreshUser();
-      }, 2000);
-      const timeout = setTimeout(() => clearInterval(interval), 30000);
-      return () => { clearInterval(interval); clearTimeout(timeout); };
+      // When returning from Stripe checkout, sync directly from Stripe API
+      // so we don't depend on the webhook having fired.
+      handleSync(true).then(() => setLoadingStatus(false));
+    } else {
+      fetchStatus();
     }
-  }, [checkoutSuccess, fetchStatus, refreshUser]);
+  }, [checkoutSuccess, fetchStatus, handleSync]);
 
   const handleSubscribe = async (tier) => {
     setError('');
@@ -489,11 +504,21 @@ function BillingTab({ user, refreshUser }) {
             )}
           </div>
         )}
-        {isActive && (
-          <button className="acct-save-btn billing-portal-btn" onClick={handlePortal} disabled={portalLoading}>
-            {portalLoading ? 'Opening…' : 'Manage Subscription'}
-          </button>
+        {syncMessage && (
+          <div className={['active', 'trialing'].includes(billingStatus?.subscription_status) ? 'acct-success-banner' : 'acct-error'} style={{ marginTop: '0.75rem' }}>
+            {syncMessage}
+          </div>
         )}
+        <div className="billing-status-actions">
+          {isActive && (
+            <button className="acct-save-btn billing-portal-btn" onClick={handlePortal} disabled={portalLoading}>
+              {portalLoading ? 'Opening…' : 'Manage Subscription'}
+            </button>
+          )}
+          <button className="acct-text-btn billing-sync-btn" onClick={() => handleSync(false)} disabled={syncing}>
+            {syncing ? 'Syncing…' : '↻ Sync with Stripe'}
+          </button>
+        </div>
       </div>
 
       {error && <div className="acct-error">{error}</div>}

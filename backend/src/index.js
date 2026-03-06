@@ -22,6 +22,10 @@ const httpServer = http.createServer(app);
 setupSocketIO(httpServer);
 const PORT = process.env.PORT || 5000;
 
+// Trust the nginx reverse proxy so express-rate-limit reads the real
+// client IP from X-Forwarded-For instead of the internal Docker IP.
+app.set('trust proxy', 1);
+
 let dbReady = false;
 
 // Stripe webhook must receive raw body — mount before express.json()

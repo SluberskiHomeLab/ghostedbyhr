@@ -49,6 +49,81 @@ router.get('/status', billingLimiter, auth, async (req, res) => {
   }
 });
 
+// POST /api/billing/sync
+// Queries Stripe directly to sync the user's subscription status.
+// Useful when a webhook was missed (e.g. server was unreachable).
+router.post('/sync', billingLimiter, auth, async (req, res) => {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe is not configured' });
+  }
+
+  try {
+    const userResult = await pool.query(
+      'SELECT id, stripe_customer_id FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { stripe_customer_id } = userResult.rows[0];
+    if (!stripe_customer_id) {
+      return res.status(200).json({
+        subscription_status: 'inactive',
+        subscription_tier: null,
+        subscription_expires_at: null,
+      });
+    }
+
+    // Fetch all subscriptions for this customer from Stripe
+    const subscriptions = await stripe.subscriptions.list({
+      customer: stripe_customer_id,
+      limit: 10,
+    });
+
+    // Prefer active/trialing; otherwise take the most recent one
+    const priority = ['active', 'trialing', 'past_due', 'canceled'];
+    let best = null;
+    for (const p of priority) {
+      best = subscriptions.data.find((s) => s.status === p);
+      if (best) break;
+    }
+
+    if (!best) {
+      // No subscriptions found — mark inactive
+      await pool.query(
+        `UPDATE users SET subscription_status = 'inactive', subscription_tier = NULL,
+         subscription_expires_at = NULL WHERE id = $1`,
+        [req.user.id]
+      );
+      return res.json({ subscription_status: 'inactive', subscription_tier: null, subscription_expires_at: null });
+    }
+
+    const priceId = best.items.data[0]?.price?.id;
+    const tier = priceId
+      ? (Object.entries(TIER_PRICE_MAP).find(([, v]) => v && v === priceId)?.[0] || null)
+      : null;
+    const expiresAt = new Date(best.current_period_end * 1000);
+
+    await pool.query(
+      `UPDATE users
+       SET subscription_status = $1, subscription_tier = $2, subscription_expires_at = $3
+       WHERE id = $4`,
+      [best.status, tier, expiresAt, req.user.id]
+    );
+
+    console.log(`[billing/sync] user ${req.user.id} synced: ${best.status} / ${tier}`);
+    res.json({
+      subscription_status: best.status,
+      subscription_tier: tier,
+      subscription_expires_at: expiresAt,
+    });
+  } catch (err) {
+    console.error('Billing sync error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // POST /api/billing/checkout
 router.post('/checkout', billingLimiter, auth, async (req, res) => {
   if (!stripe) {
@@ -113,8 +188,7 @@ router.post('/checkout', billingLimiter, auth, async (req, res) => {
 });
 
 // POST /api/billing/portal
-router.post('/portal', billingLimiter, auth, async (req, res) => {
-  if (!stripe) {
+router.post('/portal', billingLimiter, auth, async (req, res) => {  if (!stripe) {
     return res.status(503).json({ error: 'Stripe is not configured' });
   }
 
