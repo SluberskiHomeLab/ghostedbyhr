@@ -198,18 +198,18 @@ function NotificationSettingsForm() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  const fetchSettings = () => {
+  const fetchSettings = useCallback(() => {
     setLoading(true);
     setLoadError(false);
     api.get('/notifications/settings')
       .then((res) => setSettings(res.data))
       .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [fetchSettings]);
 
   const toggle = (key) => setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
 
