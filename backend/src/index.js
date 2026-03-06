@@ -15,6 +15,7 @@ const connectionRoutes = require('./routes/connections');
 const uploadRoutes = require('./routes/upload');
 const notificationRoutes = require('./routes/notifications');
 const hashtagRoutes = require('./routes/hashtags');
+const billingRoutes = require('./routes/billing');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -22,6 +23,9 @@ setupSocketIO(httpServer);
 const PORT = process.env.PORT || 5000;
 
 let dbReady = false;
+
+// Stripe webhook must receive raw body — mount before express.json()
+app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
 
 app.use(cors());
 app.use(express.json());
@@ -54,6 +58,7 @@ app.use('/api/connections', connectionRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/hashtags', hashtagRoutes);
+app.use('/api/billing', billingRoutes);
 
 pool.connect()
   .then(async (client) => {
@@ -104,6 +109,14 @@ pool.connect()
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_post_hashtags_hashtag_id ON post_hashtags(hashtag_id)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_posts_visibility ON posts(visibility)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
+    // Migrate: subscription columns
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id) WHERE stripe_customer_id IS NOT NULL`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) NOT NULL DEFAULT 'inactive'`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_tier VARCHAR(50)`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP`);
+    // Migrate: address
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address VARCHAR(500)`);
     dbReady = true;
     httpServer.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

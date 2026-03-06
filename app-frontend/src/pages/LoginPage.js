@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
 function LoginPage() {
-  const { login, user } = useAuth();
+  const { appLogin, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,12 +26,17 @@ function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      await appLogin(email, password);
       navigate('/');
     } catch (err) {
+      if (err.subscriptionRequired && err.redirectUrl) {
+        window.location.href = err.redirectUrl;
+        return;
+      }
       setError(
         err.response?.data?.message ||
         err.response?.data?.error ||
+        err.message ||
         'Login failed. Please check your credentials.'
       );
     } finally {

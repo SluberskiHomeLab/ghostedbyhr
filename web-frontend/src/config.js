@@ -13,6 +13,7 @@ const runtimeConfig = window.__RUNTIME_CONFIG__ || {};
 
 const config = {
   APP_URL: runtimeConfig.APP_URL || import.meta.env.VITE_APP_URL || '/app',
+  API_URL: runtimeConfig.API_URL || import.meta.env.VITE_API_URL || '/api',
 };
 
 export default config;

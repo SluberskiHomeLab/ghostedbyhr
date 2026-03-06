@@ -1,36 +1,37 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user');
-    if (!stored) {
-      return null;
-    }
+    const stored = localStorage.getItem('web_user');
+    if (!stored) return null;
     try {
       return JSON.parse(stored);
     } catch {
-      localStorage.removeItem('user');
+      localStorage.removeItem('web_user');
       return null;
     }
   });
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [token, setToken] = useState(() => localStorage.getItem('web_token'));
   const [loading, setLoading] = useState(true);
+
+  // Modal state: null | 'login' | 'register'
+  const [modal, setModal] = useState(null);
 
   useEffect(() => {
     const verifyToken = async () => {
-      const storedToken = localStorage.getItem('token');
+      const storedToken = localStorage.getItem('web_token');
       if (storedToken) {
         try {
           const response = await api.get('/auth/me');
           const userData = response.data;
           setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('web_user', JSON.stringify(userData));
         } catch {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          localStorage.removeItem('web_token');
+          localStorage.removeItem('web_user');
           setToken(null);
           setUser(null);
         }
@@ -43,31 +44,11 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     const { token: newToken, user: newUser } = response.data;
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem('web_token', newToken);
+    localStorage.setItem('web_user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
     return response.data;
-  };
-
-  const appLogin = async (email, password) => {
-    try {
-      const response = await api.post('/auth/app-login', { email, password });
-      const { token: newToken, user: newUser } = response.data;
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      setToken(newToken);
-      setUser(newUser);
-      return response.data;
-    } catch (err) {
-      if (err.response?.status === 402) {
-        const subscriptionError = new Error(err.response.data.error || 'Subscription required');
-        subscriptionError.subscriptionRequired = true;
-        subscriptionError.redirectUrl = err.response.data.redirectUrl;
-        throw subscriptionError;
-      }
-      throw err;
-    }
   };
 
   const register = async (email, password, firstName, lastName) => {
@@ -78,33 +59,36 @@ export function AuthProvider({ children }) {
       last_name: lastName,
     });
     const { token: newToken, user: newUser } = response.data;
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem('web_token', newToken);
+    localStorage.setItem('web_user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
     return response.data;
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('web_token');
+    localStorage.removeItem('web_user');
     setToken(null);
     setUser(null);
   };
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const response = await api.get('/auth/me');
       const userData = response.data;
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('web_user', JSON.stringify(userData));
     } catch (err) {
       console.error('Failed to refresh user:', err);
     }
-  };
+  }, []);
+
+  const showModal = (mode = 'login') => setModal(mode);
+  const hideModal = () => setModal(null);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, appLogin, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, loading, modal, login, register, logout, refreshUser, showModal, hideModal }}>
       {children}
     </AuthContext.Provider>
   );
@@ -117,5 +101,3 @@ export function useAuth() {
   }
   return context;
 }
-
-export default AuthContext;

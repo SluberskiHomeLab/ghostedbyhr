@@ -1,0 +1,366 @@
+/* ─── Hero ─────────────────────────────────────────────────────── */
+.pricing-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #ffffff;
+  padding: 5rem 2rem;
+  text-align: center;
+}
+
+.pricing-hero-content {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.pricing-hero-eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a89dff;
+  margin-bottom: 1rem;
+}
+
+.pricing-hero h1 {
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 1.25rem;
+}
+
+.pricing-hero p {
+  font-size: 1.1rem;
+  color: #cccccc;
+  line-height: 1.75;
+  margin: 0;
+}
+
+.pricing-hero p strong {
+  color: #ffffff;
+}
+
+/* ─── Why we charge ─────────────────────────────────────────── */
+.pricing-why {
+  background: #0f0f1a;
+  padding: 4rem 2rem;
+}
+
+.pricing-why-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.pricing-why-card {
+  background: #16213e;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.pricing-why-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.pricing-why-card h3 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin: 0 0 0.6rem;
+}
+
+.pricing-why-card p {
+  color: #aaaaaa;
+  font-size: 0.93rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ─── Plans section ─────────────────────────────────────────── */
+.pricing-plans-section {
+  background: #0f0f1a;
+  padding: 5rem 2rem;
+  text-align: center;
+}
+
+.pricing-plans-heading {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+}
+
+.pricing-plans-sub {
+  color: #888;
+  font-size: 0.95rem;
+  margin: 0 0 2.5rem;
+}
+
+.pricing-error {
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  background: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  color: #ff6b7a;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.pricing-plans-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* ─── Plan card ─────────────────────────────────────────────── */
+.pricing-plan-card {
+  background: #16213e;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  border-radius: 14px;
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.pricing-plan-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(108, 99, 255, 0.5);
+}
+
+.pricing-plan-featured {
+  border-color: #6c63ff;
+  background: linear-gradient(160deg, #1d1b45 0%, #16213e 100%);
+  box-shadow: 0 0 0 1px #6c63ff, 0 12px 40px rgba(108, 99, 255, 0.25);
+}
+
+.pricing-plan-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6c63ff;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.9rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pricing-plan-header {
+  margin-top: 0.5rem;
+}
+
+.pricing-plan-name {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 0.6rem;
+}
+
+.pricing-plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.pricing-plan-amount {
+  color: #ffffff;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pricing-plan-period {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.pricing-plan-monthly {
+  color: #a89dff;
+  font-size: 0.82rem;
+  margin: 0.25rem 0 0;
+}
+
+.pricing-plan-desc {
+  color: #aaaaaa;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 0.75rem;
+}
+
+.pricing-plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.pricing-plan-features li {
+  color: #cccccc;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.pricing-check {
+  color: #6c63ff;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pricing-plan-btn {
+  margin-top: 0.5rem;
+  background: transparent;
+  border: 1.5px solid rgba(108, 99, 255, 0.5);
+  border-radius: 8px;
+  color: #a89dff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.7rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.pricing-plan-btn:hover:not(:disabled) {
+  background: rgba(108, 99, 255, 0.15);
+  border-color: #6c63ff;
+  color: #ffffff;
+}
+
+.pricing-plan-btn-featured {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  color: #ffffff;
+}
+
+.pricing-plan-btn-featured:hover:not(:disabled) {
+  background: #5a52d5;
+  border-color: #5a52d5;
+}
+
+.pricing-plan-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── FAQ ────────────────────────────────────────────────────── */
+.pricing-faq {
+  background: #0a0a14;
+  padding: 5rem 2rem;
+}
+
+.pricing-faq-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pricing-faq-inner h2 {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0 0 2.5rem;
+}
+
+.pricing-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.pricing-faq-item {
+  background: #16213e;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.pricing-faq-item h4 {
+  color: #ffffff;
+  font-size: 1rem;
+  margin: 0 0 0.6rem;
+}
+
+.pricing-faq-item p {
+  color: #aaaaaa;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pricing-faq-item p strong {
+  color: #cccccc;
+}
+
+/* ─── Bottom CTA ─────────────────────────────────────────────── */
+.pricing-bottom-cta {
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+  padding: 5rem 2rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.pricing-bottom-cta h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem;
+}
+
+.pricing-bottom-cta p {
+  color: #cccccc;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 560px;
+  margin: 0 auto 2rem;
+}
+
+.pricing-cta-btn {
+  background: #6c63ff;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.9rem 2.75rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.pricing-cta-btn:hover {
+  background: #5a52d5;
+  transform: translateY(-2px);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pricing-hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .pricing-plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-faq-grid {
+    grid-template-columns: 1fr;
+  }
+}
