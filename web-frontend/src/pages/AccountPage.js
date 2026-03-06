@@ -239,7 +239,7 @@ function NotificationSettingsForm() {
       {loading ? <p>Loading…</p> : loadError ? (
         <div className="acct-error">
           Failed to load notification preferences.{' '}
-          <button type="button" className="acct-retry-btn" onClick={fetchSettings}>Retry</button>
+          <button type="button" className="acct-save-btn" onClick={fetchSettings}>Retry</button>
         </div>
       ) : (
         <form onSubmit={handleSave} className="acct-form">
