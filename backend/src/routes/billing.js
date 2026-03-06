@@ -206,11 +206,12 @@ router.post('/webhook', billingLimiter, async (req, res) => {
         );
         if (userResult.rows.length > 0) {
           const userId = userResult.rows[0].id;
+          const expiresAt = new Date(sub.current_period_end * 1000);
           await pool.query(
             `UPDATE users
-             SET subscription_status = 'canceled', subscription_expires_at = NOW()
-             WHERE id = $1`,
-            [userId]
+             SET subscription_status = 'canceled', subscription_expires_at = $1
+             WHERE id = $2`,
+            [expiresAt, userId]
           );
         }
         break;
