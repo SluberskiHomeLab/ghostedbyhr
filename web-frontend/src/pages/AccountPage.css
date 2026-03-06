@@ -407,3 +407,42 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Password reset via email code ── */
+
+.acct-success-banner {
+  background: rgba(40, 167, 69, 0.15);
+  border: 1px solid rgba(40, 167, 69, 0.4);
+  color: #57d97c;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.acct-reset-link-row {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #aaaaaa;
+}
+
+.acct-text-btn {
+  background: none;
+  border: none;
+  color: #6c63ff;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.acct-text-btn:hover {
+  color: #8b84ff;
+}
+
+.acct-reset-info {
+  color: #cccccc;
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}

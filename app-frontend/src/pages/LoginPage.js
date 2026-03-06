@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
 
 function LoginPage() {
   const { appLogin, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState(location.state?.resetSuccess ? 'Password reset successfully. You can now sign in.' : '');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -53,6 +55,7 @@ function LoginPage() {
         </div>
         <div className="login-card">
           <h2>Sign In</h2>
+          {info && <div className="login-info">{info}</div>}
           {error && <div className="login-error">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -81,6 +84,9 @@ function LoginPage() {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
+          <p className="login-footer">
+            <Link to="/forgot-password" className="login-forgot-link">Forgot password?</Link>
+          </p>
           <p className="login-footer">
             New to Ghosted By HR? <Link to="/register">Join now</Link>
           </p>

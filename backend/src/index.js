@@ -117,6 +117,9 @@ pool.connect()
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP`);
     // Migrate: address
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS address VARCHAR(500)`);
+    // Migrate: password reset
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_token VARCHAR(255)`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_expires TIMESTAMP`);
     dbReady = true;
     httpServer.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

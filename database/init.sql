@@ -12,8 +12,15 @@ CREATE TABLE users (
     headline VARCHAR(255),
     bio TEXT,
     location VARCHAR(255),
+    address VARCHAR(500),
     avatar_url VARCHAR(500),
     banner_url VARCHAR(500),
+    stripe_customer_id VARCHAR(255),
+    subscription_status VARCHAR(50) NOT NULL DEFAULT 'inactive',
+    subscription_tier VARCHAR(50),
+    subscription_expires_at TIMESTAMP,
+    password_reset_token VARCHAR(255),
+    password_reset_expires TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -58,9 +65,12 @@ CREATE TABLE connections (
     status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(requester_id, receiver_id),
-    CONSTRAINT unique_connection_pair UNIQUE (LEAST(requester_id, receiver_id), GREATEST(requester_id, receiver_id))
+    UNIQUE(requester_id, receiver_id)
 );
+
+-- Bidirectional uniqueness: prevent (A→B) and (B→A) both existing
+CREATE UNIQUE INDEX unique_connection_pair
+    ON connections (LEAST(requester_id, receiver_id), GREATEST(requester_id, receiver_id));
 
 -- Create indexes for better query performance
 CREATE INDEX idx_posts_user_id ON posts(user_id);

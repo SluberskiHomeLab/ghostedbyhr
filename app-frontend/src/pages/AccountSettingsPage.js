@@ -80,12 +80,20 @@ function ChangeEmailForm({ currentEmail, onSuccess }) {
 }
 
 function ChangePasswordForm() {
+  const { user } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  // Email-code reset sub-flow
+  const [resetMode, setResetMode] = useState(false);
+  const [resetStep, setResetStep] = useState('send'); // 'send' | 'verify'
+  const [resetCode, setResetCode] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,54 +131,163 @@ function ChangePasswordForm() {
     }
   };
 
+  const handleSendCode = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      await api.post('/auth/forgot-password', { email: user.email });
+      setSuccess('A 6-digit reset code has been sent to your email.');
+      setResetStep('verify');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send reset code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (resetNewPassword.length < 6) { setError('New password must be at least 6 characters.'); return; }
+    if (resetNewPassword !== resetConfirmPassword) { setError('Passwords do not match.'); return; }
+    setLoading(true);
+    try {
+      await api.post('/auth/reset-password', { email: user.email, code: resetCode, newPassword: resetNewPassword });
+      setSuccess('Password reset successfully.');
+      setResetMode(false);
+      setResetStep('send');
+      setResetCode(''); setResetNewPassword(''); setResetConfirmPassword('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid or expired reset code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="settings-card">
       <h2>Change Password</h2>
       {error && <div className="settings-error">{error}</div>}
-      <form onSubmit={handleSubmit} className="settings-form">
-        <div className="form-group">
-          <label htmlFor="currentPassword">Current Password</label>
-          <input
-            id="currentPassword"
-            type="password"
-            placeholder="Enter your current password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="newPassword">New Password</label>
-          <input
-            id="newPassword"
-            type="password"
-            placeholder="At least 6 characters"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-            autoComplete="new-password"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm New Password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            placeholder="Repeat new password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            autoComplete="new-password"
-          />
-        </div>
-        <div className="settings-form-footer">
-          <button type="submit" className="settings-save-btn" disabled={loading}>
-            {loading ? 'Saving…' : 'Update Password'}
-          </button>
-          {success && <span className="settings-success">✓ {success}</span>}
-        </div>
-      </form>
+      {success && <div className="settings-success-banner">✓ {success}</div>}
+
+      {!resetMode ? (
+        <>
+          <form onSubmit={handleSubmit} className="settings-form">
+            <div className="form-group">
+              <label htmlFor="currentPassword">Current Password</label>
+              <input
+                id="currentPassword"
+                type="password"
+                placeholder="Enter your current password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="newPassword">New Password</label>
+              <input
+                id="newPassword"
+                type="password"
+                placeholder="At least 6 characters"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm New Password</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Repeat new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="settings-form-footer">
+              <button type="submit" className="settings-save-btn" disabled={loading}>
+                {loading ? 'Saving…' : 'Update Password'}
+              </button>
+            </div>
+          </form>
+          <p className="settings-reset-link-row">
+            Forgot your current password?{' '}
+            <button
+              type="button"
+              className="settings-text-btn"
+              onClick={() => { setResetMode(true); setResetStep('send'); setError(''); setSuccess(''); }}
+            >
+              Reset via email code
+            </button>
+          </p>
+        </>
+      ) : (
+        <>
+          {resetStep === 'send' ? (
+            <form onSubmit={handleSendCode} className="settings-form">
+              <p className="settings-reset-info">
+                A 6-digit code will be sent to <strong>{user?.email}</strong>.
+              </p>
+              <div className="settings-form-footer">
+                <button type="button" className="settings-text-btn" onClick={() => { setResetMode(false); setError(''); setSuccess(''); }}>Cancel</button>
+                <button type="submit" className="settings-save-btn" disabled={loading}>{loading ? 'Sending…' : 'Send Reset Code'}</button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyCode} className="settings-form">
+              <div className="form-group">
+                <label htmlFor="resetCode">6-Digit Reset Code</label>
+                <input
+                  id="resetCode"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="Enter code from your email"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))}
+                  required
+                  autoComplete="one-time-code"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="resetNewPassword">New Password</label>
+                <input
+                  id="resetNewPassword"
+                  type="password"
+                  placeholder="At least 6 characters"
+                  value={resetNewPassword}
+                  onChange={(e) => setResetNewPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="resetConfirmPassword">Confirm New Password</label>
+                <input
+                  id="resetConfirmPassword"
+                  type="password"
+                  placeholder="Repeat new password"
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="settings-form-footer">
+                <button type="button" className="settings-text-btn" onClick={() => { setResetMode(false); setResetStep('send'); setError(''); setSuccess(''); }}>Cancel</button>
+                <button type="submit" className="settings-save-btn" disabled={loading}>{loading ? 'Resetting…' : 'Reset Password'}</button>
+              </div>
+            </form>
+          )}
+        </>
+      )}
     </div>
   );
 }

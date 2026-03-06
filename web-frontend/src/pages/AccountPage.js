@@ -131,12 +131,20 @@ function ChangeEmailForm() {
 }
 
 function ChangePasswordForm() {
+  const { user } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  // Email-code reset sub-flow
+  const [resetMode, setResetMode] = useState(false); // false = normal, true = code flow
+  const [resetStep, setResetStep] = useState('send'); // 'send' | 'verify'
+  const [resetCode, setResetCode] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,28 +164,108 @@ function ChangePasswordForm() {
     }
   };
 
+  const handleSendCode = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      await api.post('/auth/forgot-password', { email: user.email });
+      setSuccess('A 6-digit reset code has been sent to your email.');
+      setResetStep('verify');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send reset code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    if (resetNewPassword.length < 6) { setError('New password must be at least 6 characters.'); return; }
+    if (resetNewPassword !== resetConfirmPassword) { setError('Passwords do not match.'); return; }
+    setLoading(true);
+    try {
+      await api.post('/auth/reset-password', { email: user.email, code: resetCode, newPassword: resetNewPassword });
+      setSuccess('Password reset successfully.');
+      setResetMode(false);
+      setResetStep('send');
+      setResetCode(''); setResetNewPassword(''); setResetConfirmPassword('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid or expired reset code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="acct-card">
       <h2>Change Password</h2>
       {error && <div className="acct-error">{error}</div>}
-      <form onSubmit={handleSubmit} className="acct-form">
-        <div className="form-group">
-          <label>Current Password</label>
-          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Current password" required />
-        </div>
-        <div className="form-group">
-          <label>New Password</label>
-          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required />
-        </div>
-        <div className="form-group">
-          <label>Confirm New Password</label>
-          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat new password" required />
-        </div>
-        <div className="acct-form-footer">
-          <button type="submit" className="acct-save-btn" disabled={loading}>{loading ? 'Saving…' : 'Update Password'}</button>
-          {success && <span className="acct-success">✓ {success}</span>}
-        </div>
-      </form>
+      {success && <div className="acct-success-banner">✓ {success}</div>}
+
+      {!resetMode ? (
+        <>
+          <form onSubmit={handleSubmit} className="acct-form">
+            <div className="form-group">
+              <label>Current Password</label>
+              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Current password" required />
+            </div>
+            <div className="form-group">
+              <label>New Password</label>
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" required />
+            </div>
+            <div className="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat new password" required />
+            </div>
+            <div className="acct-form-footer">
+              <button type="submit" className="acct-save-btn" disabled={loading}>{loading ? 'Saving…' : 'Update Password'}</button>
+            </div>
+          </form>
+          <p className="acct-reset-link-row">
+            Forgot your current password?{' '}
+            <button type="button" className="acct-text-btn" onClick={() => { setResetMode(true); setResetStep('send'); setError(''); setSuccess(''); }}>
+              Reset via email code
+            </button>
+          </p>
+        </>
+      ) : (
+        <>
+          {resetStep === 'send' ? (
+            <form onSubmit={handleSendCode} className="acct-form">
+              <p className="acct-reset-info">
+                A 6-digit code will be sent to <strong>{user?.email}</strong>.
+              </p>
+              <div className="acct-form-footer">
+                <button type="button" className="acct-text-btn" onClick={() => { setResetMode(false); setError(''); setSuccess(''); }}>Cancel</button>
+                <button type="submit" className="acct-save-btn" disabled={loading}>{loading ? 'Sending…' : 'Send Reset Code'}</button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyCode} className="acct-form">
+              <div className="form-group">
+                <label>6-Digit Reset Code</label>
+                <input type="text" inputMode="numeric" maxLength={6} value={resetCode} onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))} placeholder="Enter code from your email" required />
+              </div>
+              <div className="form-group">
+                <label>New Password</label>
+                <input type="password" value={resetNewPassword} onChange={(e) => setResetNewPassword(e.target.value)} placeholder="At least 6 characters" required />
+              </div>
+              <div className="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" value={resetConfirmPassword} onChange={(e) => setResetConfirmPassword(e.target.value)} placeholder="Repeat new password" required />
+              </div>
+              <div className="acct-form-footer">
+                <button type="button" className="acct-text-btn" onClick={() => { setResetMode(false); setResetStep('send'); setError(''); setSuccess(''); }}>Cancel</button>
+                <button type="submit" className="acct-save-btn" disabled={loading}>{loading ? 'Resetting…' : 'Reset Password'}</button>
+              </div>
+            </form>
+          )}
+        </>
+      )}
     </div>
   );
 }
